@@ -1,17 +1,17 @@
 {
-  "name": "roilafx/shop",
+  "name": "roilafx/install",
   "require": {
 
   },
   "autoload": {
     "psr-4": {
-      "roilafx\\Shop\\": "src"
+      "roilafx\\Install\\": "src"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "roilafx\\Shop\\ShopServiceProvider"
+        "roilafx\\Install\\InstallServiceProvider"
       ]
 
     }
