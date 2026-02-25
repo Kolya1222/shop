@@ -1,0 +1,16 @@
+{
+  "paginate": "pages",
+  "display": "10",
+  "PrevNextAlwaysShow": "1",
+  "TplNextP": "@CODE:<a href=\"[+link+]\" class=\"pagination-item next\">Далее <i class=\"fas fa-chevron-right\"></i></a>",
+  "TplNextI": "@CODE:<span class=\"pagination-item next disabled\">Далее <i class=\"fas fa-chevron-right\"></i></span>",
+  "TplPrevP": "@CODE:<a href=\"[+link+]\" class=\"pagination-item\"><i class=\"fas fa-chevron-left\"></i></a>",
+  "TplPrevI": "@CODE:<span class=\"pagination-item disabled\"><i class=\"fas fa-chevron-left\"></i></span>",
+  "TplPage": "@CODE:<a href=\"[+link+]\" class=\"pagination-item\">[+num+]</a>",
+  "TplFirstP": "@CODE:<a href=\"[+link+]\" class=\"pagination-item\"><i class=\"fas fa-angle-double-left\"></i></a>",
+  "TplLastP": "@CODE:<a href=\"[+link+]\" class=\"pagination-item\"><i class=\"fas fa-angle-double-right\"></i></a>",
+  "TplFirstI": "@CODE:<span class=\"pagination-item disabled\"><i class=\"fas fa-angle-double-left\"></i></span>",
+  "TplLastI": "@CODE:<span class=\"pagination-item disabled\"><i class=\"fas fa-angle-double-right\"></i></span>",
+  "TplCurrentPage": "@CODE:<span class=\"pagination-item active\">[+num+]</span>",
+  "TplWrapPaginate": "@CODE:<div class=\"pagination\">[+wrap+]</div>"
+}

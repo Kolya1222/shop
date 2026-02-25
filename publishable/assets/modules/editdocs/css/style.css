@@ -1,0 +1,181 @@
+body {
+    min-height: 500px;
+}
+
+#selfil {
+    visibility: hidden;
+}
+
+.sumosize {
+    width:250px;
+    float: left;
+    margin: 0 20px 0 0;
+}
+
+.tab-row .tab a {
+    text-decoration: none;
+    color: #333;
+}
+.tab-page {
+    /* min-height: 500px; */
+}
+
+.clear {
+    clear: both;
+}
+
+.subbat {
+    float: left;
+    padding: 18px 0 0 0;
+}
+
+
+.mess {
+    float: right;
+    min-width: 200px;
+}
+
+.warning {
+    position: fixed;
+    top: 10px;
+    right: 100px;
+    z-index: 200;
+}
+
+.warning2 {
+
+}
+
+.error {
+    color: #c00;
+    font-weight: bold;
+    background: #E3FCF6;
+}
+
+.parf {
+    float: left;
+    margin: 0 20px 0 0;
+}
+
+.tabres {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+
+.tabres tr td {
+    padding: 3px;
+    border: 1px solid #eee;
+}
+
+.tabres tr td input {
+    width: 100%;
+}
+
+.tabres tr:nth-child(1) td {
+   font-weight: bold;
+    background: #ddd;
+    font-size: 15px;
+}
+
+.alert-ok {
+    padding: 10px;
+    background: #E3FCF6;
+    margin: 10px 0;
+}
+
+.alert-er {
+    padding: 10px;
+    background: #FFE9E6;
+}
+
+.loading {
+    padding: 10px;
+    font-size: 15px;
+    color: #888;
+    text-align: center;
+    background: #E3FCF6;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.page {
+    padding: 4px 6px;
+    background: #999;
+    color: #fff;
+    margin: 0 1px 0 1px;
+    cursor: pointer;
+}
+b.current {
+    padding: 3px 5px;
+}
+h2.tab a {
+    padding: 11px 15px !important;
+    /*border: 1px solid red;*/
+}
+
+.sending #pro {
+    display: none;
+}
+
+.tarea {
+    height: 35px;
+    resize: vertical;
+    width: 99%;
+}
+
+.add-text {
+    font-weight: bold;
+    color: rgb(8, 114, 48);
+}
+
+.upd-text {
+    font-weight: bold;
+    color: rgb(5, 56, 114);
+}
+
+.test-text {
+    font-weight: bold;
+    color: rgb(150, 7, 26);
+}
+
+.td_add {
+    background-color: #e2efe5;
+}
+
+.td_upd {
+    background-color: #e7f8fb;
+}
+
+.td_notadd {
+    background-color: #fbe7e9 !important;
+}
+
+span.td_add, span.td_notadd, span.td_upd {
+    border: 1px solid #aaa;
+    padding: 0 10px;
+}
+
+input[type='number'] {
+    -moz-appearance:textfield !important;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+}
+
+.readme {
+    font-size: 1.5rem;
+}
+
+.srtd input {
+    border: none !important;
+}
+
+.srav_list {
+    min-width:370px;
+}
+
+

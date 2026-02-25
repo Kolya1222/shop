@@ -1,0 +1,19 @@
+{
+  "name": "roilafx/shop",
+  "require": {
+
+  },
+  "autoload": {
+    "psr-4": {
+      "roilafx\\Shop\\": "src"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "roilafx\\Shop\\ShopServiceProvider"
+      ]
+
+    }
+  }
+}

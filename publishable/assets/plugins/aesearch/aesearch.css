@@ -1,0 +1,10 @@
+.aesearch-results {
+    display:block;
+    position:absolute;
+    z-index: 1000;
+    width:100%;
+}
+.aesearch-results.hidden {
+    position:relative;
+    display:none;
+}

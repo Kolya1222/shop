@@ -1,0 +1,8 @@
+{
+  "debug": "0",
+  "tpl": "@CODE:<a href=\"[+url+]\" itemprop=\"item\"><span itemprop=\"name\">[+title+]</span></a><i class=\"fas fa-chevron-right\"></i>",
+  "tplCurrent": "@CODE:<span class=\"current\" itemprop=\"name\">[+title+]</span>",
+  "ownerTPL": "@CODE:<div class=\"container\"><div class=\"breadcrumbs\" itemscope itemtype=\"http://schema.org/BreadcrumbList\">[+crumbs.wrap+]</div></div>",
+  "sysKey": "crumbs",
+  "urlScheme": "full"
+}
