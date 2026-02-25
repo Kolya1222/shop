@@ -1,6 +1,6 @@
 <?php
 
-namespace roilafx\Install\Console\Commands;
+namespace EvolutionCMS\Shop\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -332,16 +332,43 @@ class ExportSiteStructure extends Command
 
         $tvRecords = SiteTmplvarContentvalue::where('contentid', $resourceId)
             ->join('site_tmplvars', 'site_tmplvars.id', '=', 'site_tmplvar_contentvalues.tmplvarid')
-            ->get(['site_tmplvars.name', 'site_tmplvars.type', 'site_tmplvar_contentvalues.value']);
+            ->get([
+                'site_tmplvars.name',
+                'site_tmplvars.type',
+                'site_tmplvars.elements',
+                'site_tmplvar_contentvalues.value'
+            ]);
 
         foreach ($tvRecords as $record) {
             $value = $record->value;
 
-            if ($this->isMultiTV($record->type) && $this->isJson($value)) {
-                $value = json_decode($value, true);
-            }
+            if ($this->isMultiTV($record->type)) {
+                if ($this->isJson($value)) {
+                    // Для MultiTV сохраняем как объект с метаданными
+                    $decoded = json_decode($value, true);
 
-            $tvValues[$record->name] = $value;
+                    // Проверяем структуру
+                    if (isset($decoded['fieldValue'])) {
+                        // Уже в правильном формате
+                        $tvValues[$record->name] = $decoded;
+                    } else {
+                        // Нужно обернуть в правильную структуру
+                        $tvValues[$record->name] = [
+                            'fieldValue' => $decoded,
+                            '_meta' => [
+                                'type' => $record->type,
+                                'elements' => $record->elements
+                            ]
+                        ];
+                    }
+                } else {
+                    // Не JSON - сохраняем как есть
+                    $tvValues[$record->name] = $value;
+                }
+            } else {
+                // Обычные TV
+                $tvValues[$record->name] = $value;
+            }
         }
 
         return $tvValues;
@@ -391,7 +418,7 @@ class ExportSiteStructure extends Command
         $exportData = [];
 
         foreach ($tvs as $tv) {
-            $exportData[] = [
+            $tvData = [
                 'id' => $tv->id,
                 'name' => $tv->name,
                 'caption' => $tv->caption,
@@ -406,6 +433,25 @@ class ExportSiteStructure extends Command
                 'locked' => (bool)$tv->locked,
                 'templates' => $this->getTVTemplates($tv->id)
             ];
+
+            // Для MultiTV добавляем дополнительную информацию
+            if ($this->isMultiTV($tv->type)) {
+                // Проверяем, есть ли файл конфигурации
+                if (!empty($tv->elements) && strpos($tv->elements, '@INCLUDE') === 0) {
+                    $configFile = str_replace('@INCLUDE ', '', $tv->elements);
+                    $tvData['multitv_config'] = [
+                        'type' => 'include',
+                        'file' => $configFile
+                    ];
+                }
+
+                // Добавляем пример структуры из default_text если есть
+                if (!empty($tv->default_text) && $this->isJson($tv->default_text)) {
+                    $tvData['multitv_default'] = json_decode($tv->default_text, true);
+                }
+            }
+
+            $exportData[] = $tvData;
         }
 
         $this->statistics['tv'] = count($exportData);
