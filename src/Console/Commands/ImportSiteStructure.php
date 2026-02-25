@@ -1,6 +1,6 @@
 <?php
 
-namespace roilafx\Shop\Console\Commands;
+namespace roilafx\Install\Console\Commands;
 
 use Illuminate\Console\Command;
 use EvolutionCMS\Models\SiteContent;
