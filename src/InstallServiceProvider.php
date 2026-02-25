@@ -1,14 +1,14 @@
 <?php
 
-namespace roilafx\Shop;
+namespace roilafx\Install;
 
 use EvolutionCMS\ServiceProvider;
-use roilafx\Shop\Console\Commands\ExportSiteStructure;
-use roilafx\Shop\Console\Commands\ImportSiteStructure;
+use roilafx\Install\Console\Commands\ExportSiteStructure;
+use roilafx\Install\Console\Commands\ImportSiteStructure;
 
-class ShopServiceProvider extends ServiceProvider
+class InstallServiceProvider extends ServiceProvider
 {
-    protected $namespace = 'shop';
+    protected $namespace = 'install';
     /**
      * Register the service provider.
      *
