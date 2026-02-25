@@ -1646,11 +1646,7 @@ class ImportSiteStructure extends Command
         }
 
         // Определяем правильное имя таблицы
-        $tableName = 'k2ku_site_content_closure';
-
-        if (Schema::hasTable($tableName)) {
-            $tableName = 'site_content_closure';
-        }
+        $tableName = evo()->getFullTableName('site_content_closure');
 
         $this->info("Используется таблица: {$tableName}");
 
