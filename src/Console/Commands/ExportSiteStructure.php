@@ -1,6 +1,6 @@
 <?php
 
-namespace roilafx\Shop\Console\Commands;
+namespace EvolutionCMS\Shop\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -361,11 +361,18 @@ class ExportSiteStructure extends Command
             $exportData[] = [
                 'id' => $template->id,
                 'templatename' => $template->templatename,
+                'templatealias' => $template->templatealias,
+                'templatecontroller' => $template->templatecontroller,
                 'description' => $template->description,
-                'content' => $template->content,
+                'editor_type' => $template->editor_type,
                 'category' => $template->category,
+                'icon' => $template->icon,
+                'template_type' => $template->template_type,
+                'content' => $template->content,
                 'locked' => (bool)$template->locked,
-                'selectable' => (bool)$template->selectable
+                'selectable' => (bool)$template->selectable,
+                'createdon' => $template->createdon,
+                'editedon' => $template->editedon
             ];
         }
 

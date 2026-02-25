@@ -35,6 +35,6 @@ class ShopServiceProvider extends ServiceProvider
             __DIR__ . '/../publishable/custom' => EVO_CORE_PATH . 'custom/',
             __DIR__ . '/../publishable/assets' => MODX_BASE_PATH . 'assets/',
         ]);
-        $this->loadMigrationsFrom(__DIR__ . '/../publishable/resources/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
     }
 }

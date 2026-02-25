@@ -1,6 +1,6 @@
 <?php
 
-namespace roilafx\Shop\Console\Commands;
+namespace EvolutionCMS\Shop\Console\Commands;
 
 use Illuminate\Console\Command;
 use EvolutionCMS\Models\SiteContent;
@@ -844,7 +844,21 @@ class ImportSiteStructure extends Command
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
 
-                unset($item['id']);
+                $templateData = [
+                    'templatename' => $item['templatename'],
+                    'templatealias' => $item['templatealias'] ?? '',
+                    'templatecontroller' => $item['templatecontroller'] ?? '',
+                    'description' => $item['description'] ?? '',
+                    'editor_type' => $item['editor_type'] ?? 0,
+                    'category' => $item['category'] ?? 0,
+                    'icon' => $item['icon'] ?? '',
+                    'template_type' => $item['template_type'] ?? 0,
+                    'content' => $item['content'] ?? '',
+                    'locked' => (int)($item['locked'] ?? 0),
+                    'selectable' => (int)($item['selectable'] ?? 1),
+                    'createdon' => $item['createdon'] ?? time(),
+                    'editedon' => $item['editedon'] ?? time()
+                ];
 
                 $template = null;
 
@@ -853,15 +867,15 @@ class ImportSiteStructure extends Command
                 }
 
                 if ($template) {
-                    $template->update($item);
+                    $template->update($templateData);
                     $this->statistics['templates']['updated']++;
                     $this->idMapping['templates'][$oldId] = $oldId;
                 } else {
                     if ($this->option('preserve-ids')) {
-                        $item['id'] = $oldId;
-                        $template = SiteTemplate::create($item);
+                        $templateData['id'] = $oldId;
+                        $template = SiteTemplate::create($templateData);
                     } else {
-                        $template = SiteTemplate::create($item);
+                        $template = SiteTemplate::create($templateData);
                     }
                     $this->statistics['templates']['created']++;
                     $this->idMapping['templates'][$oldId] = $template->id;
@@ -887,11 +901,25 @@ class ImportSiteStructure extends Command
             try {
                 $oldId = $item['id'];
                 $templates = $item['templates'] ?? [];
-                unset($item['templates'], $item['id']);
+
+                // Подготавливаем все поля TV
+                $tvData = [
+                    'name' => $item['name'],
+                    'caption' => $item['caption'] ?? '',
+                    'description' => $item['description'] ?? '',
+                    'type' => $item['type'] ?? 'text',
+                    'category' => $item['category'] ?? 0,
+                    'elements' => $item['elements'] ?? '',
+                    'default_text' => $item['default_text'] ?? '',
+                    'rank' => $item['rank'] ?? 0,
+                    'display' => $item['display'] ?? '',
+                    'display_params' => $item['display_params'] ?? '',
+                    'locked' => (int)($item['locked'] ?? 0)
+                ];
 
                 // Маппинг категории
-                if (isset($item['category']) && $item['category'] > 0) {
-                    $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
+                if (isset($tvData['category']) && $tvData['category'] > 0) {
+                    $tvData['category'] = $this->idMapping['categories'][$tvData['category']] ?? $tvData['category'];
                 }
 
                 $tv = null;
@@ -901,15 +929,15 @@ class ImportSiteStructure extends Command
                 }
 
                 if ($tv) {
-                    $tv->update($item);
+                    $tv->update($tvData);
                     $this->statistics['tvs']['updated']++;
                     $this->idMapping['tvs'][$oldId] = $oldId;
                 } else {
                     if ($this->option('preserve-ids')) {
-                        $item['id'] = $oldId;
-                        $tv = SiteTmplvar::create($item);
+                        $tvData['id'] = $oldId;
+                        $tv = SiteTmplvar::create($tvData);
                     } else {
-                        $tv = SiteTmplvar::create($item);
+                        $tv = SiteTmplvar::create($tvData);
                     }
                     $this->statistics['tvs']['created']++;
                     $this->idMapping['tvs'][$oldId] = $tv->id;
@@ -932,6 +960,11 @@ class ImportSiteStructure extends Command
     {
         foreach ($templates as $templateId) {
             $newTemplateId = $this->idMapping['templates'][$templateId] ?? $templateId;
+
+            // Удаляем старые связи, если они есть (при обновлении)
+            if ($this->option('update')) {
+                SiteTmplvarTemplate::where('tmplvarid', $tvId)->delete();
+            }
 
             SiteTmplvarTemplate::firstOrCreate([
                 'tmplvarid' => $tvId,
