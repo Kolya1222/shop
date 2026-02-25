@@ -609,7 +609,8 @@ class ImportSiteStructure extends Command
             $this->info("Загружено связей Closure из отдельного блока: " . count($this->closureRelations));
         }
 
-        DB::beginTransaction();
+        // ВСЕ ИМПОРТЫ ДЕЛАЕМ БЕЗ ОБЩЕЙ ТРАНЗАКЦИИ
+        // Каждый блок импорта сам управляет своими транзакциями
 
         try {
             // Очистка таблиц если нужно
@@ -617,72 +618,91 @@ class ImportSiteStructure extends Command
                 $this->clearTables($importAll);
             }
 
-            // Импорт в правильном порядке (с учетом зависимостей)
-
             // 1. Категории
             if ($importAll || $this->option('import-categories')) {
-                $this->importCategories($data['data']['categories'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importCategories($data['data']['categories'] ?? []);
+                }, 'категорий');
             }
 
             // 2. Шаблоны
             if ($importAll || $this->option('import-templates')) {
-                $this->importTemplates($data['data']['templates'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importTemplates($data['data']['templates'] ?? []);
+                }, 'шаблонов');
             }
 
             // 3. TV параметры
             if ($importAll || $this->option('import-tv')) {
-                $this->importTVs($data['data']['tvs'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importTVs($data['data']['tvs'] ?? []);
+                }, 'TV параметров');
             }
 
             // 4. Чанки
             if ($importAll || $this->option('import-chunks')) {
-                $this->importChunks($data['data']['chunks'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importChunks($data['data']['chunks'] ?? []);
+                }, 'чанков');
             }
 
             // 5. Сниппеты
             if ($importAll || $this->option('import-snippets')) {
-                $this->importSnippets($data['data']['snippets'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importSnippets($data['data']['snippets'] ?? []);
+                }, 'сниппетов');
             }
 
             // 6. Плагины
             if ($importAll || $this->option('import-plugins')) {
-                $this->importPlugins($data['data']['plugins'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importPlugins($data['data']['plugins'] ?? []);
+                }, 'плагинов');
             }
 
             // 7. Модули
             if ($importAll || $this->option('import-modules')) {
-                $this->importModules($data['data']['modules'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importModules($data['data']['modules'] ?? []);
+                }, 'модулей');
             }
 
-            // 8. Ресурсы (самое сложное - в конце)
+            // 8. Ресурсы - САМОЕ ВАЖНОЕ, ТОЖЕ В ОТДЕЛЬНОЙ ТРАНЗАКЦИИ
             if ($importAll || $this->option('import-resources')) {
-                $this->importResources($data['data']['resources'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importResources($data['data']['resources'] ?? []);
+                }, 'ресурсов');
             }
 
             // 9. Восстановление связей Closure
             if ($importAll || $this->option('import-closure')) {
-                $this->restoreClosureRelations();
+                $this->safeTransaction(function () {
+                    $this->restoreClosureRelations();
+                }, 'связей Closure');
             }
 
             // 10. Commerce данные
             if ($importAll || $this->option('import-commerce')) {
-                $this->importCommerce($data['data']['commerce'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importCommerce($data['data']['commerce'] ?? []);
+                }, 'Commerce данных');
             }
 
             // 11. EvoSearch данные
             if ($importAll || $this->option('import-evosearch')) {
-                $this->importEvoSearch($data['data']['evosearch'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importEvoSearch($data['data']['evosearch'] ?? []);
+                }, 'EvoSearch данных');
             }
 
             // 12. ListTV данные
             if ($importAll || $this->option('import-list-tv')) {
-                $this->importListTV($data['data']['list_tv'] ?? []);
+                $this->safeTransaction(function () use ($data) {
+                    $this->importListTV($data['data']['list_tv'] ?? []);
+                }, 'ListTV данных');
             }
-
-            DB::commit();
         } catch (\Exception $e) {
-            DB::rollBack();
-            $this->error('Ошибка при импорте: ' . $e->getMessage());
+            $this->error('Критическая ошибка при импорте: ' . $e->getMessage());
             $this->error('Стек трассировки: ' . $e->getTraceAsString());
             return Command::FAILURE;
         }
@@ -699,6 +719,41 @@ class ImportSiteStructure extends Command
 
         $this->info('Импорт успешно завершен!');
         return Command::SUCCESS;
+    }
+
+    /**
+     * Безопасное выполнение в транзакции
+     */
+    private function safeTransaction(callable $callback, string $operationName = 'операции'): void
+    {
+        // Проверяем, есть ли уже активная транзакция
+        $transactionLevel = DB::transactionLevel();
+
+        if ($transactionLevel > 0) {
+            $this->warn("Обнаружена активная транзакция (уровень {$transactionLevel}) при импорте {$operationName}");
+        }
+
+        // Начинаем новую транзакцию
+        DB::beginTransaction();
+        $this->info("Начата транзакция для импорта {$operationName}");
+
+        try {
+            $callback();
+            DB::commit();
+            $this->info("Транзакция для импорта {$operationName} успешно закоммичена");
+        } catch (\Exception $e) {
+            // Проверяем, активна ли еще транзакция
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+                $this->info("Транзакция для импорта {$operationName} откачена из-за ошибки");
+            } else {
+                $this->warn("Транзакция для импорта {$operationName} уже была завершена, пропускаем rollBack");
+            }
+
+            // Сохраняем ошибку и пробрасываем исключение дальше
+            $this->errors[] = "Ошибка при импорте {$operationName}: " . $e->getMessage();
+            throw $e;
+        }
     }
 
     /**
@@ -896,13 +951,19 @@ class ImportSiteStructure extends Command
         }
 
         $this->info('Импорт TV параметров...');
+        $this->info('Всего TV в файле: ' . count($tvs));
+        $tvNames = array_column($tvs, 'name');
+        $this->info('Имена TV: ' . implode(', ', $tvNames));
+
+        $successCount = 0;
+        $failCount = 0;
 
         foreach ($tvs as $item) {
             try {
                 $oldId = $item['id'];
                 $templates = $item['templates'] ?? [];
 
-                // Подготавливаем все поля TV
+                // Подготавливаем ВСЕ поля TV
                 $tvData = [
                     'name' => $item['name'],
                     'caption' => $item['caption'] ?? '',
@@ -914,12 +975,22 @@ class ImportSiteStructure extends Command
                     'rank' => $item['rank'] ?? 0,
                     'display' => $item['display'] ?? '',
                     'display_params' => $item['display_params'] ?? '',
-                    'locked' => (int)($item['locked'] ?? 0)
+                    'locked' => (int)($item['locked'] ?? 0),
+                    'editor_type' => $item['editor_type'] ?? 0,
+                    'properties' => $item['properties'] ?? null,
+                    'createdon' => $item['createdon'] ?? time(),
+                    'editedon' => $item['editedon'] ?? time()
                 ];
 
                 // Маппинг категории
                 if (isset($tvData['category']) && $tvData['category'] > 0) {
                     $tvData['category'] = $this->idMapping['categories'][$tvData['category']] ?? $tvData['category'];
+                }
+
+                // Логируем для отладки
+                $this->line("  Создание TV '{$item['name']}' (old ID: {$oldId})");
+                if (!empty($item['properties'])) {
+                    $this->line("    properties: " . (is_array($item['properties']) ? 'массив' : $item['properties']));
                 }
 
                 $tv = null;
@@ -932,6 +1003,8 @@ class ImportSiteStructure extends Command
                     $tv->update($tvData);
                     $this->statistics['tvs']['updated']++;
                     $this->idMapping['tvs'][$oldId] = $oldId;
+                    $this->info("  ✓ TV '{$item['name']}' обновлен (ID: {$tv->id})");
+                    $successCount++;
                 } else {
                     if ($this->option('preserve-ids')) {
                         $tvData['id'] = $oldId;
@@ -941,6 +1014,8 @@ class ImportSiteStructure extends Command
                     }
                     $this->statistics['tvs']['created']++;
                     $this->idMapping['tvs'][$oldId] = $tv->id;
+                    $this->info("  ✓ TV '{$item['name']}' создан (старый ID: {$oldId}, новый ID: {$tv->id})");
+                    $successCount++;
                 }
 
                 // Импорт связей с шаблонами
@@ -949,7 +1024,18 @@ class ImportSiteStructure extends Command
                 }
             } catch (\Exception $e) {
                 $this->errors[] = "TV '{$item['name']}': " . $e->getMessage();
+                $this->error("  ✗ TV '{$item['name']}' НЕ создан: " . $e->getMessage());
+                $failCount++;
             }
+        }
+
+        $this->info("Импорт TV завершен: успешно {$successCount}, ошибок {$failCount}");
+
+        // Проверяем, какие TV реально созданы
+        $existingTVs = SiteTmplvar::all();
+        $this->info('TV в базе после импорта:');
+        foreach ($existingTVs as $tv) {
+            $this->line("  - ID: {$tv->id}, Name: {$tv->name}, Type: {$tv->type}");
         }
     }
 
@@ -1590,6 +1676,8 @@ class ImportSiteStructure extends Command
                 if (!empty($children)) {
                     $this->importResources($children, $resource->id);
                 }
+                $existingTVs = SiteTmplvar::pluck('name')->toArray();
+                $this->info('TV в базе: ' . implode(', ', $existingTVs));
             } catch (\Exception $e) {
                 $this->errors[] = "Ресурс '{$item['pagetitle']}': " . $e->getMessage();
             }
@@ -1604,37 +1692,81 @@ class ImportSiteStructure extends Command
         foreach ($tvValues as $tvName => $value) {
             $tv = SiteTmplvar::where('name', $tvName)->first();
 
-            if (!$tv) continue;
-
-            $valueToSave = $value;
-
-            if ($this->isMultiTV($tv->type)) {
-                // Проверяем структуру
-                if (is_array($value)) {
-                    if (isset($value['fieldValue'])) {
-                        // Уже в правильном формате
-                        $valueToSave = json_encode($value, JSON_UNESCAPED_UNICODE);
-                    } else if (isset($value[0]) && isset($value[0]['name'])) {
-                        // Простой массив характеристик - оборачиваем
-                        $valueToSave = json_encode([
-                            'fieldValue' => $value
-                        ], JSON_UNESCAPED_UNICODE);
-                    } else {
-                        $valueToSave = json_encode($value);
-                    }
-                }
-            } else {
-                $valueToSave = is_array($value) ? json_encode($value) : $value;
+            if (!$tv) {
+                $this->warn("TV '{$tvName}' не найден, значение пропущено");
+                continue;
             }
 
-            SiteTmplvarContentvalue::updateOrCreate(
-                [
-                    'tmplvarid' => $tv->id,
-                    'contentid' => $resourceId
-                ],
-                ['value' => $valueToSave]
-            );
+            $this->line("  Обработка TV: {$tvName} (type: {$tv->type}, ID: {$tv->id})");
+
+            if (is_array($value)) {
+                $this->line("    Значение является массивом с " . count($value) . " элементами");
+            }
+
+            // Сохраняем значение - ВСЕГДА в site_tmplvar_contentvalues
+            try {
+                $before = microtime(true);
+
+                if (is_array($value)) {
+                    // Для массивов (включая MultiTV) сохраняем как JSON
+                    $savedValue = json_encode($value, JSON_UNESCAPED_UNICODE);
+
+                    // Если это MultiTV, можно добавить дополнительную обработку
+                    if ($this->isMultiTV($tv->type)) {
+                        $this->line("    ⚠️ Обнаружен MultiTV: {$tvName}");
+                        $this->line("    JSON длина: " . strlen($savedValue));
+                    }
+                } else {
+                    $savedValue = $value;
+                }
+
+                SiteTmplvarContentvalue::updateOrCreate(
+                    [
+                        'tmplvarid' => $tv->id,
+                        'contentid' => $resourceId
+                    ],
+                    ['value' => $savedValue]
+                );
+
+                $time = round((microtime(true) - $before) * 1000, 2);
+                $this->line("    ✓ Значение сохранено за {$time}ms");
+            } catch (\Exception $e) {
+                $this->error("    ✗ Ошибка: " . $e->getMessage());
+            }
         }
+    }
+
+    private function saveMultiTVValue($tv, int $resourceId, array $value): void
+    {
+        // Для MultiTV данные всегда должны сохраняться как JSON в site_tmplvar_contentvalues
+        // Не пытаемся использовать отдельные таблицы multitv_items_X
+
+        // Подготавливаем данные для сохранения
+        // MultiTV ожидает определенную структуру JSON
+        $dataToSave = $value;
+
+        // Проверяем структуру массива
+        if (isset($value[0]) && is_array($value[0])) {
+            // Это уже правильный формат MultiTV: массив записей
+            $dataToSave = $value;
+        } elseif (isset($value['fieldValue'])) {
+            // Формат с fieldValue
+            $dataToSave = $value;
+        } else {
+            // Пробуем преобразовать в формат MultiTV
+            $dataToSave = ['fieldValue' => $value];
+        }
+
+        // Сохраняем как JSON в основную таблицу
+        SiteTmplvarContentvalue::updateOrCreate(
+            [
+                'tmplvarid' => $tv->id,
+                'contentid' => $resourceId
+            ],
+            ['value' => json_encode($dataToSave, JSON_UNESCAPED_UNICODE)]
+        );
+
+        $this->line("    ✓ MultiTV значение сохранено как JSON");
     }
 
     /**
@@ -1658,11 +1790,7 @@ class ImportSiteStructure extends Command
         }
 
         // Определяем правильное имя таблицы
-        $tableName = 'k2ku_site_content_closure';
-
-        if (Schema::hasTable($tableName)) {
-            $tableName = 'site_content_closure';
-        }
+        $tableName = evo()->getFullTableName('site_content_closure');
 
         $this->info("Используется таблица: {$tableName}");
 

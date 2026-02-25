@@ -431,12 +431,15 @@ class ExportSiteStructure extends Command
                 'display' => $tv->display,
                 'display_params' => $tv->display_params,
                 'locked' => (bool)$tv->locked,
+                'editor_type' => $tv->editor_type,
+                'properties' => $tv->properties,
+                'createdon' => $tv->createdon,
+                'editedon' => $tv->editedon,
                 'templates' => $this->getTVTemplates($tv->id)
             ];
 
             // Для MultiTV добавляем дополнительную информацию
             if ($this->isMultiTV($tv->type)) {
-                // Проверяем, есть ли файл конфигурации
                 if (!empty($tv->elements) && strpos($tv->elements, '@INCLUDE') === 0) {
                     $configFile = str_replace('@INCLUDE ', '', $tv->elements);
                     $tvData['multitv_config'] = [
@@ -445,7 +448,6 @@ class ExportSiteStructure extends Command
                     ];
                 }
 
-                // Добавляем пример структуры из default_text если есть
                 if (!empty($tv->default_text) && $this->isJson($tv->default_text)) {
                     $tvData['multitv_default'] = json_decode($tv->default_text, true);
                 }
