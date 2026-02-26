@@ -17,3 +17,15 @@ php artisan vendor:publish --provider="roilafx\Install\InstallServiceProvider"
 ```
 php artisan site:full-import --all --clear-first
 ```
+5. Отредактировать composer в /core/custom/ добавив загрузку
+```
+    "autoload": {
+        "psr-4": {
+            "EvolutionCMS\\Shop\\": "packages/shop/src/"
+        }
+    }
+```
+6. Обновить composer 
+```
+composer update
+```
