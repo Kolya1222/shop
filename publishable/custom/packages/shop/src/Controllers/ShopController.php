@@ -17,7 +17,7 @@ class ShopController extends TemplateController
             'cartheader'    => $this->getCart(),
             'cart'          => $this->getCart('cart'),
             'footermenu'    => $this->getmenu(2),
-            'footerclient'  => $this->getmenu(41),
+            'footerclient'  => $this->getmenu(40),
         ];
         $this->addViewData($data);
     }

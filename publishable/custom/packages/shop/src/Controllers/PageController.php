@@ -21,7 +21,7 @@ class PageController extends TemplateController
             'headermenu'    => $this->getmenu(0),
             'cartheader'    => $this->getCart(),
             'footermenu'    => $this->getmenu(2),
-            'footerclient'  => $this->getmenu(41),
+            'footerclient'  => $this->getmenu(40),
         ];
         $this->addViewData($data);
     }

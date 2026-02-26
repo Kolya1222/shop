@@ -23,7 +23,7 @@ class CatalogController extends TemplateController
             'footermenu'    => $this->getmenu(2),
             'filter'        => $this->makeFilter(),
             'filterresult'  => $this->getFilteredCatalog(),
-            'footerclient'  => $this->getmenu(41),
+            'footerclient'  => $this->getmenu(40),
         ];
         $this->addViewData($data);
     }

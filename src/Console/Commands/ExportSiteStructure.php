@@ -186,15 +186,12 @@ class ExportSiteStructure extends Command
         $withDeleted = $this->option('with-deleted');
         $withClosure = $this->option('with-closure') || $this->option('all');
 
-        // Исправление: убираем лишний параметр $withClosure
         $structure = $this->getResourceStructure($parent, $depth, $withDeleted);
-
-        // Если нужно экспортировать связи Closure
         if ($withClosure) {
-            // Получаем ID всех экспортированных ресурсов
+            // Получаем ID экспортированных ресурсов
             $allResourceIds = $this->getAllResourceIds($structure);
 
-            // Экспортируем ВСЕ связи Closure для этих ресурсов
+            // Экспортируем связи Closure для этих ресурсов
             $this->closureRelations = $this->exportAllClosureRelations($allResourceIds);
             $this->statistics['closure_relations'] = count($this->closureRelations);
 
@@ -209,7 +206,6 @@ class ExportSiteStructure extends Command
 
     /**
      * Рекурсивное получение структуры ресурсов
-     * Исправление: убираем параметр $withClosure, так как связи теперь в отдельном блоке
      */
     private function getResourceStructure(int $parent, int $depth, bool $withDeleted, int $level = 0): array
     {
@@ -297,13 +293,13 @@ class ExportSiteStructure extends Command
         // Определяем правильное имя таблицы
         $tableName = 'site_content_closure';
         if (!Schema::hasTable($tableName)) {
-            $tableName = 'k2ku_site_content_closure';
+            $tableName = evo()->getFullTableName('site_content_closure');
         }
 
         $this->info("  Поиск связей Closure в таблице: {$tableName}");
         $this->info("  Для ресурсов: " . count($resourceIds));
 
-        // Получаем ВСЕ связи, где ancestor ИЛИ descendant в списке ресурсов
+        // Получаем связи, где ancestor ИЛИ descendant в списке ресурсов
         $relations = DB::table($tableName)
             ->whereIn('ancestor', $resourceIds)
             ->orWhereIn('descendant', $resourceIds)
@@ -342,31 +338,11 @@ class ExportSiteStructure extends Command
         foreach ($tvRecords as $record) {
             $value = $record->value;
 
-            if ($this->isMultiTV($record->type)) {
-                if ($this->isJson($value)) {
-                    // Для MultiTV сохраняем как объект с метаданными
-                    $decoded = json_decode($value, true);
-
-                    // Проверяем структуру
-                    if (isset($decoded['fieldValue'])) {
-                        // Уже в правильном формате
-                        $tvValues[$record->name] = $decoded;
-                    } else {
-                        // Нужно обернуть в правильную структуру
-                        $tvValues[$record->name] = [
-                            'fieldValue' => $decoded,
-                            '_meta' => [
-                                'type' => $record->type,
-                                'elements' => $record->elements
-                            ]
-                        ];
-                    }
-                } else {
-                    // Не JSON - сохраняем как есть
-                    $tvValues[$record->name] = $value;
-                }
+            // Для MultiTV проверяем JSON
+            if ($this->isMultiTV($record->type) && $this->isJson($value)) {
+                $decoded = json_decode($value, true);
+                $tvValues[$record->name] = $decoded;
             } else {
-                // Обычные TV
                 $tvValues[$record->name] = $value;
             }
         }

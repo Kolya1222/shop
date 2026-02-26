@@ -9,7 +9,11 @@ php artisan package:installrequire roilafx/shop "*"
 ```
 php artisan migrate
 ```
-2. Публикация стилей и скриптов
+3. Публикация стилей и скриптов
 ```
 php artisan vendor:publish --provider="roilafx\Install\InstallServiceProvider"
+```
+4. Выполнить импорт данных
+```
+php artisan site:full-import --all --clear-first
 ```

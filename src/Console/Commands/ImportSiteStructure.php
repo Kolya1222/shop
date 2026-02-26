@@ -194,8 +194,6 @@ class ImportSiteStructure extends Command
      */
     private function showPreview(array $data): int
     {
-        $this->info('=== ПРЕДВАРИТЕЛЬНЫЙ ПРОСМОТР ===');
-
         $stats = $this->analyzeData($data);
 
         $this->info('Будет импортировано:');
@@ -211,7 +209,7 @@ class ImportSiteStructure extends Command
             ['Модули', $stats['modules']['total'], $stats['modules']['create'], $stats['modules']['update']],
         ];
 
-        // Добавляем Commerce если есть
+        // Добавляем Commerce, если есть
         if ($stats['commerce_currency']['total'] > 0) {
             $rows[] = ['Commerce валюты', $stats['commerce_currency']['total'], $stats['commerce_currency']['create'], $stats['commerce_currency']['update']];
         }
@@ -222,12 +220,12 @@ class ImportSiteStructure extends Command
             $rows[] = ['Commerce заказы', $stats['commerce_orders']['total'], $stats['commerce_orders']['create'], $stats['commerce_orders']['update']];
         }
 
-        // Добавляем EvoSearch если есть
+        // Добавляем EvoSearch, если есть
         if ($stats['evosearch']['total'] > 0) {
             $rows[] = ['EvoSearch записи', $stats['evosearch']['total'], $stats['evosearch']['create'], $stats['evosearch']['update']];
         }
 
-        // Добавляем ListTV если есть
+        // Добавляем ListTV, если есть
         if ($stats['list_categories']['total'] > 0) {
             $rows[] = ['ListTV категории', $stats['list_categories']['total'], $stats['list_categories']['create'], $stats['list_categories']['update']];
         }
@@ -602,16 +600,6 @@ class ImportSiteStructure extends Command
     private function importData(array $data): int
     {
         $importAll = $this->option('all');
-
-        // Загружаем отдельный блок closure_relations, если он есть
-        if (isset($data['closure_relations'])) {
-            $this->closureRelations = $data['closure_relations'];
-            $this->info("Загружено связей Closure из отдельного блока: " . count($this->closureRelations));
-        }
-
-        // ВСЕ ИМПОРТЫ ДЕЛАЕМ БЕЗ ОБЩЕЙ ТРАНЗАКЦИИ
-        // Каждый блок импорта сам управляет своими транзакциями
-
         try {
             // Очистка таблиц если нужно
             if ($this->option('clear-first')) {
@@ -667,7 +655,7 @@ class ImportSiteStructure extends Command
                 }, 'модулей');
             }
 
-            // 8. Ресурсы - САМОЕ ВАЖНОЕ, ТОЖЕ В ОТДЕЛЬНОЙ ТРАНЗАКЦИИ
+            // 8. Ресурсы
             if ($importAll || $this->option('import-resources')) {
                 $this->safeTransaction(function () use ($data) {
                     $this->importResources($data['data']['resources'] ?? []);
@@ -845,7 +833,7 @@ class ImportSiteStructure extends Command
         if (empty($categories)) {
             return;
         }
-
+        usort($categories, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт категорий...');
 
         foreach ($categories as $item) {
@@ -887,7 +875,7 @@ class ImportSiteStructure extends Command
         if (empty($templates)) {
             return;
         }
-
+        usort($templates, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт шаблонов...');
 
         foreach ($templates as $item) {
@@ -949,7 +937,7 @@ class ImportSiteStructure extends Command
         if (empty($tvs)) {
             return;
         }
-
+        usort($tvs, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт TV параметров...');
         $this->info('Всего TV в файле: ' . count($tvs));
         $tvNames = array_column($tvs, 'name');
@@ -963,7 +951,7 @@ class ImportSiteStructure extends Command
                 $oldId = $item['id'];
                 $templates = $item['templates'] ?? [];
 
-                // Подготавливаем ВСЕ поля TV
+                // Подготавливаем поля TV
                 $tvData = [
                     'name' => $item['name'],
                     'caption' => $item['caption'] ?? '',
@@ -1003,7 +991,7 @@ class ImportSiteStructure extends Command
                     $tv->update($tvData);
                     $this->statistics['tvs']['updated']++;
                     $this->idMapping['tvs'][$oldId] = $oldId;
-                    $this->info("  ✓ TV '{$item['name']}' обновлен (ID: {$tv->id})");
+                    $this->info("  TV '{$item['name']}' обновлен (ID: {$tv->id})");
                     $successCount++;
                 } else {
                     if ($this->option('preserve-ids')) {
@@ -1014,7 +1002,7 @@ class ImportSiteStructure extends Command
                     }
                     $this->statistics['tvs']['created']++;
                     $this->idMapping['tvs'][$oldId] = $tv->id;
-                    $this->info("  ✓ TV '{$item['name']}' создан (старый ID: {$oldId}, новый ID: {$tv->id})");
+                    $this->info("  TV '{$item['name']}' создан (старый ID: {$oldId}, новый ID: {$tv->id})");
                     $successCount++;
                 }
 
@@ -1024,7 +1012,7 @@ class ImportSiteStructure extends Command
                 }
             } catch (\Exception $e) {
                 $this->errors[] = "TV '{$item['name']}': " . $e->getMessage();
-                $this->error("  ✗ TV '{$item['name']}' НЕ создан: " . $e->getMessage());
+                $this->error("  TV '{$item['name']}' НЕ создан: " . $e->getMessage());
                 $failCount++;
             }
         }
@@ -1047,7 +1035,7 @@ class ImportSiteStructure extends Command
         foreach ($templates as $templateId) {
             $newTemplateId = $this->idMapping['templates'][$templateId] ?? $templateId;
 
-            // Удаляем старые связи, если они есть (при обновлении)
+            // Удаляем старые связи, если они есть
             if ($this->option('update')) {
                 SiteTmplvarTemplate::where('tmplvarid', $tvId)->delete();
             }
@@ -1067,7 +1055,7 @@ class ImportSiteStructure extends Command
         if (empty($chunks)) {
             return;
         }
-
+        usort($chunks, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт чанков...');
 
         foreach ($chunks as $item) {
@@ -1115,7 +1103,7 @@ class ImportSiteStructure extends Command
         if (empty($snippets)) {
             return;
         }
-
+        usort($snippets, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт сниппетов...');
 
         foreach ($snippets as $item) {
@@ -1163,7 +1151,7 @@ class ImportSiteStructure extends Command
         if (empty($plugins)) {
             return;
         }
-
+        usort($plugins, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт плагинов...');
 
         foreach ($plugins as $item) {
@@ -1213,6 +1201,10 @@ class ImportSiteStructure extends Command
      */
     private function importPluginEvents(int $pluginId, array $events): void
     {
+        if (empty($events)) {
+            return;
+        }
+        usort($events, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($events as $event) {
             $eventId = $event['evtid'] ?? null;
             $eventName = $event['name'] ?? null;
@@ -1249,7 +1241,7 @@ class ImportSiteStructure extends Command
         if (empty($modules)) {
             return;
         }
-
+        usort($modules, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт модулей...');
 
         foreach ($modules as $item) {
@@ -1305,6 +1297,10 @@ class ImportSiteStructure extends Command
      */
     private function importModuleAccess(int $moduleId, array $access): void
     {
+        if (empty($access)) {
+            return;
+        }
+        usort($access, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($access as $usergroup) {
             SiteModuleAccess::firstOrCreate([
                 'module' => $moduleId,
@@ -1318,6 +1314,10 @@ class ImportSiteStructure extends Command
      */
     private function importModuleDependencies(int $moduleId, array $dependencies): void
     {
+        if (empty($dependencies)) {
+            return;
+        }
+        usort($dependencies, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($dependencies as $dep) {
             SiteModuleDepobj::firstOrCreate([
                 'module' => $moduleId,
@@ -1340,31 +1340,37 @@ class ImportSiteStructure extends Command
 
         // Импорт валют
         if (isset($data['currency']) && !empty($data['currency'])) {
+            usort($data['currency'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_currency', $data['currency'], 'commerce_currency');
         }
 
         // Импорт статусов заказов
         if (isset($data['order_statuses']) && !empty($data['order_statuses'])) {
+            usort($data['order_statuses'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_order_statuses', $data['order_statuses'], 'commerce_order_statuses');
         }
 
         // Импорт заказов
         if (isset($data['orders']) && !empty($data['orders'])) {
+            usort($data['orders'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_orders', $data['orders'], 'commerce_orders');
         }
 
         // Импорт товаров в заказах
         if (isset($data['order_products']) && !empty($data['order_products'])) {
+            usort($data['order_products'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_order_products', $data['order_products'], 'commerce_order_products');
         }
 
         // Импорт истории заказов
         if (isset($data['order_history']) && !empty($data['order_history'])) {
+            usort($data['order_history'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_order_history', $data['order_history'], 'commerce_order_history');
         }
 
         // Импорт платежей
         if (isset($data['order_payments']) && !empty($data['order_payments'])) {
+            usort($data['order_payments'], fn($a, $b) => $a['id'] <=> $b['id']);
             $this->importCommerceTable('commerce_order_payments', $data['order_payments'], 'commerce_order_payments');
         }
     }
@@ -1441,7 +1447,6 @@ class ImportSiteStructure extends Command
         if (empty($data)) {
             return;
         }
-
         $this->info('Импорт данных EvoSearch...');
 
         $tableName = 'evosearch_table';
@@ -1613,75 +1618,134 @@ class ImportSiteStructure extends Command
             return;
         }
 
+        $flatResources = $this->flattenResources($resources);
+
+        usort($flatResources, function ($a, $b) {
+            return $a['id'] <=> $b['id'];
+        });
+
+        $this->info('Импорт ресурсов (отсортировано по ID)...');
+        $this->info('Всего ресурсов для импорта: ' . count($flatResources));
+
         $importParent = $parent ?? (int)$this->option('parent');
         $defaultTemplate = $this->option('template') ? (int)$this->option('template') : null;
         $published = (bool)$this->option('publish');
         $currentTime = time();
 
-        foreach ($resources as $item) {
+        // 3. Маппинг старых ID на новые
+        $idMapping = [];
+
+        // 4. Сначала создаем ВСЕ ресурсы
+        foreach ($flatResources as $item) {
             try {
                 $oldId = $item['id'] ?? null;
                 $tvValues = $item['tv'] ?? [];
-                $children = $item['children'] ?? [];
 
-                unset($item['tv'], $item['closure_relations'], $item['children'], $item['id']);
+                // Создаем копию для изменений
+                $resourceData = $item;
+                unset($resourceData['tv'], $resourceData['closure_relations'], $resourceData['children'], $resourceData['id']);
 
-                $item['parent'] = $importParent;
+                // parent пока оставляем как есть, потом обновим
+                $resourceData['parent'] = $importParent; // временно
 
-                if (isset($item['template']) && $item['template'] > 0) {
-                    $item['template'] = $this->idMapping['templates'][$item['template']] ?? $item['template'];
+                // Маппинг шаблона
+                if (isset($resourceData['template']) && $resourceData['template'] > 0) {
+                    $resourceData['template'] = $this->idMapping['templates'][$resourceData['template']] ?? $resourceData['template'];
                 } elseif ($defaultTemplate !== null) {
-                    $item['template'] = $defaultTemplate;
+                    $resourceData['template'] = $defaultTemplate;
                 }
 
-                $item['createdon'] = $currentTime;
-                $item['editedon'] = $currentTime;
+                // Даты
+                $resourceData['createdon'] = $currentTime;
+                $resourceData['editedon'] = $currentTime;
                 if ($published) {
-                    $item['published'] = 1;
-                    $item['publishedon'] = $currentTime;
+                    $resourceData['published'] = 1;
+                    $resourceData['publishedon'] = $currentTime;
                 }
 
+                // Создаем или обновляем ресурс
                 $resource = null;
-
                 if ($this->option('update') && $oldId) {
                     $resource = SiteContent::find($oldId);
                 }
 
                 if ($resource) {
-                    $resource->update($item);
+                    $resource->update($resourceData);
                     $this->statistics['resources']['updated']++;
                     $newId = $resource->id;
-                    if ($oldId) {
-                        $this->idMapping['resources'][$oldId] = $oldId;
-                    }
+                    $this->info("  Обновлен ресурс ID {$oldId} (новый ID: {$newId})");
                 } else {
                     if ($this->option('preserve-ids') && $oldId) {
-                        $item['id'] = $oldId;
-                        $resource = SiteContent::create($item);
+                        $resourceData['id'] = $oldId;
+                        $resource = SiteContent::create($resourceData);
                     } else {
-                        $resource = SiteContent::create($item);
+                        $resource = SiteContent::create($resourceData);
                     }
                     $this->statistics['resources']['created']++;
                     $newId = $resource->id;
-                    if ($oldId) {
-                        $this->idMapping['resources'][$oldId] = $newId;
-                    }
+                    $this->info("  Создан ресурс ID {$oldId} (новый ID: {$newId})");
                 }
 
+                // Сохраняем маппинг
+                if ($oldId) {
+                    $idMapping[$oldId] = $newId;
+                    $this->idMapping['resources'][$oldId] = $newId;
+                }
+
+                // Сохраняем TV значения
                 if (!empty($tvValues)) {
                     $this->importResourceTVs($resource->id, $tvValues);
                     $this->statistics['tv_values'] += count($tvValues);
                 }
-
-                if (!empty($children)) {
-                    $this->importResources($children, $resource->id);
-                }
-                $existingTVs = SiteTmplvar::pluck('name')->toArray();
-                $this->info('TV в базе: ' . implode(', ', $existingTVs));
             } catch (\Exception $e) {
                 $this->errors[] = "Ресурс '{$item['pagetitle']}': " . $e->getMessage();
             }
         }
+
+        // 5. Теперь обновляем parent'ы для всех ресурсов
+        $this->info('Обновление связей parent...');
+        foreach ($flatResources as $item) {
+            $oldId = $item['id'] ?? null;
+            $oldParent = $item['parent'] ?? 0;
+
+            if ($oldId && isset($idMapping[$oldId])) {
+                $newId = $idMapping[$oldId];
+
+                // Новый parent ID (0 или маппинг)
+                $newParent = 0;
+                if ($oldParent > 0 && isset($idMapping[$oldParent])) {
+                    $newParent = $idMapping[$oldParent];
+                }
+
+                // Обновляем parent
+                if ($newParent != $importParent) { // не обновляем если не изменился
+                    SiteContent::where('id', $newId)->update(['parent' => $newParent]);
+                    $this->line("    Ресурс ID {$newId}: parent {$oldParent} → {$newParent}");
+                }
+            }
+        }
+
+        // 6. Показываем итоговый список TV (для информации)
+        $existingTVs = SiteTmplvar::pluck('name')->toArray();
+        $this->info('TV в базе после импорта ресурсов: ' . implode(', ', $existingTVs));
+    }
+
+    /**
+     * Преобразование иерархического массива в плоский
+     */
+    private function flattenResources(array $resources, array &$flat = []): array
+    {
+        foreach ($resources as $resource) {
+            $children = $resource['children'] ?? [];
+            unset($resource['children']);
+
+            $flat[] = $resource;
+
+            if (!empty($children)) {
+                $this->flattenResources($children, $flat);
+            }
+        }
+        return $flat;
     }
 
     /**
@@ -1699,26 +1763,43 @@ class ImportSiteStructure extends Command
 
             $this->line("  Обработка TV: {$tvName} (type: {$tv->type}, ID: {$tv->id})");
 
-            if (is_array($value)) {
-                $this->line("    Значение является массивом с " . count($value) . " элементами");
+            // Декодируем JSON строку в массив для tovarparams
+            if ($tvName === 'tovarparams' && is_string($value)) {
+                $decoded = json_decode($value, true);
+                if (is_array($decoded) && isset($decoded['fieldValue'])) {
+                    $value = $decoded;
+                    $this->line("  JSON декодирован в массив");
+                }
             }
 
-            // Сохраняем значение - ВСЕГДА в site_tmplvar_contentvalues
+            // СПЕЦИАЛЬНАЯ ОБРАБОТКА ДЛЯ tovarparams (теперь как массив)
+            if ($tvName === 'tovarparams' && is_array($value) && isset($value['fieldValue'])) {
+                $this->line("  Обновляем ID параметров в tovarparams...");
+
+                $updated = false;
+                foreach ($value['fieldValue'] as &$param) {
+                    if (isset($param['param_id'])) {
+                        $oldId = $param['param_id'];
+                        $newId = $this->idMapping['tvs'][$oldId] ?? null;
+
+                        if ($newId && $oldId != $newId) {
+                            $this->line("    param_id: {$oldId} → {$newId}");
+                            $param['param_id'] = (string)$newId;
+                            $updated = true;
+                        }
+                    }
+                }
+
+                if ($updated) {
+                    $this->line("  ID параметров в tovarparams обновлены");
+                }
+            }
+
+            // Сохраняем значение
             try {
                 $before = microtime(true);
 
-                if (is_array($value)) {
-                    // Для массивов (включая MultiTV) сохраняем как JSON
-                    $savedValue = json_encode($value, JSON_UNESCAPED_UNICODE);
-
-                    // Если это MultiTV, можно добавить дополнительную обработку
-                    if ($this->isMultiTV($tv->type)) {
-                        $this->line("    ⚠️ Обнаружен MultiTV: {$tvName}");
-                        $this->line("    JSON длина: " . strlen($savedValue));
-                    }
-                } else {
-                    $savedValue = $value;
-                }
+                $savedValue = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
 
                 SiteTmplvarContentvalue::updateOrCreate(
                     [
@@ -1729,44 +1810,11 @@ class ImportSiteStructure extends Command
                 );
 
                 $time = round((microtime(true) - $before) * 1000, 2);
-                $this->line("    ✓ Значение сохранено за {$time}ms");
+                $this->line("    Значение сохранено за {$time}ms");
             } catch (\Exception $e) {
-                $this->error("    ✗ Ошибка: " . $e->getMessage());
+                $this->error("    Ошибка: " . $e->getMessage());
             }
         }
-    }
-
-    private function saveMultiTVValue($tv, int $resourceId, array $value): void
-    {
-        // Для MultiTV данные всегда должны сохраняться как JSON в site_tmplvar_contentvalues
-        // Не пытаемся использовать отдельные таблицы multitv_items_X
-
-        // Подготавливаем данные для сохранения
-        // MultiTV ожидает определенную структуру JSON
-        $dataToSave = $value;
-
-        // Проверяем структуру массива
-        if (isset($value[0]) && is_array($value[0])) {
-            // Это уже правильный формат MultiTV: массив записей
-            $dataToSave = $value;
-        } elseif (isset($value['fieldValue'])) {
-            // Формат с fieldValue
-            $dataToSave = $value;
-        } else {
-            // Пробуем преобразовать в формат MultiTV
-            $dataToSave = ['fieldValue' => $value];
-        }
-
-        // Сохраняем как JSON в основную таблицу
-        SiteTmplvarContentvalue::updateOrCreate(
-            [
-                'tmplvarid' => $tv->id,
-                'contentid' => $resourceId
-            ],
-            ['value' => json_encode($dataToSave, JSON_UNESCAPED_UNICODE)]
-        );
-
-        $this->line("    ✓ MultiTV значение сохранено как JSON");
     }
 
     /**
@@ -1853,14 +1901,6 @@ class ImportSiteStructure extends Command
 
         $this->statistics['closure_relations'] = $inserted;
         $this->info("Вставлено {$inserted} новых связей Closure");
-    }
-
-    /**
-     * Проверка MultiTV
-     */
-    private function isMultiTV(string $type): bool
-    {
-        return in_array($type, ['multitv', 'custom_tv:multitv']);
     }
 
     /**
