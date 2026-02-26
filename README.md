@@ -27,5 +27,5 @@ php artisan site:full-import --all --clear-first
 ```
 6. Обновить composer 
 ```
-composer update
+composer dump-autoload
 ```
