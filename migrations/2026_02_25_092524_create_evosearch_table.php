@@ -18,15 +18,10 @@ class CreateEvosearchTable extends Migration
             $table->integer('docid')->index();
             $table->string('table', 255)->index();
             $table->string('pagetitle', 255)->index();
-
-            // Используем полнотекстовые индексы для поиска
             $table->mediumText('content_with_tv');
             $table->mediumText('content_with_tv_index');
-
-            // Добавляем полнотекстовые индексы
             $table->fullText('pagetitle', 'evosearch_pagetitle_fulltext');
-            $table->fullText('content_with_tv', 'evosearch_content_fulltext');
-            $table->fullText('content_with_tv_index', 'evosearch_index_fulltext');
+            $table->fullText(['content_with_tv', 'content_with_tv_index'], 'evosearch_content_combo_fulltext');
         });
     }
 
