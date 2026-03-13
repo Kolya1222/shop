@@ -639,7 +639,7 @@ class ExportSiteStructure extends Command
             $data['order_statuses'] = DB::table('commerce_order_statuses')->get()->toArray();
             $this->statistics['commerce_order_statuses'] = count($data['order_statuses']);
         }
-
+/*
         // Заказы
         if (Schema::hasTable('commerce_orders')) {
             $data['orders'] = DB::table('commerce_orders')->get()->toArray();
@@ -663,7 +663,7 @@ class ExportSiteStructure extends Command
             $data['order_payments'] = DB::table('commerce_order_payments')->get()->toArray();
             $this->statistics['commerce_order_payments'] = count($data['order_payments']);
         }
-
+*/
         return $data;
     }
 
