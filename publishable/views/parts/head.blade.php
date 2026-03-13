@@ -14,4 +14,4 @@
 @else
 <meta name="robots" content="noindex, nofollow">
 @endif
-<link rel="canonical" href="{{ urlProcessor::makeUrl($id ?? 1,'','','full') }}">
+<link rel="canonical" href="@makeUrl($id ?? 1,'','','full')">

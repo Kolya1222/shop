@@ -23,9 +23,9 @@ class EFilterService implements FilterServiceInterface
             'tvList'        => 'price, product_tag',
             'tvPrefix'      => '',
             'display'       => 6,
-            'depth'         => '4',
+            'depth'         => 4,
             'paginate'      => 'pages',
-            'addWhereList'  => 'c.template = 4',
+            'addWhereList'  => 'c.template = 3',
             'config'        => 'paginate:custom'
         ];
         
@@ -50,7 +50,7 @@ class EFilterService implements FilterServiceInterface
             $products[] = [
                 'id'            => $item['id'],
                 'title'         => $item['pagetitle'],
-                'price'         => $this->formatPrice($item['price']),
+                'price'         => $item['price'],
                 'product_tag'   => $item['product_tag'] ?? ''
             ];
         }
@@ -59,10 +59,5 @@ class EFilterService implements FilterServiceInterface
             'products' => $products,
             'pages'    => evo()->getPlaceholder('pages')
         ];
-    }
-    
-    private function formatPrice($price)
-    {
-        return evo()->runSnippet('PriceFormat', ['price' => $price]);
     }
 }

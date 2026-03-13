@@ -11,7 +11,7 @@ trait CommonDataTraits
             'cartheader'   => $this->getCart(),
             'breadcrumbs'  => $this->getbreadcrumbs(evo()->documentIdentifier),
             'footermenu'   => $this->getmenu(2),
-            'footerclient' => $this->getmenu(40),
+            'footerclient' => $this->getmenu(9),
         ];
     }
 }

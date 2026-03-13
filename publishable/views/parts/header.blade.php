@@ -17,7 +17,7 @@
         
         <!-- Блок поиска -->
         <div class="search-wrapper aesearch">
-            <form class="search-form" action=@makeUrl(45)>
+            <form class="search-form" action=@makeUrl(14)>
                 <input type="text" name="search" class="search-input" 
                        aria-label="Search" aria-describedby="button-addon2" 
                        placeholder="Поиск товаров..." autocomplete="off">
