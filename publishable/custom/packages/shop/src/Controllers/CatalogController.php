@@ -5,26 +5,20 @@ namespace EvolutionCMS\Shop\Controllers;
 use EvolutionCMS\TemplateController;
 use EvolutionCMS\Shop\Traits\BreadcrumbsTraits;
 use EvolutionCMS\Shop\Traits\DLMenuTraits;
-use EvolutionCMS\Shop\Traits\FilterTrait;
 use EvolutionCMS\Shop\Traits\CartTraits;
+use EvolutionCMS\Shop\Traits\CommonDataTraits;
+use EvolutionCMS\Shop\Interfaces\FilterServiceInterface;
 
 class CatalogController extends TemplateController
 {
-    use BreadcrumbsTraits;
-    use DLMenuTraits;
-    use FilterTrait;
-    use CartTraits;
+    use BreadcrumbsTraits, DLMenuTraits, CartTraits, CommonDataTraits;
+
     public function process()
     {
-        $data = [
-            'breadcrumbs'   => $this->getbreadcrumbs(evo()->documentIdentifier),
-            'headermenu'    => $this->getmenu(0),
-            'cartheader'    => $this->getCart(),
-            'footermenu'    => $this->getmenu(2),
-            'filter'        => $this->makeFilter(),
-            'filterresult'  => $this->getFilteredCatalog(),
-            'footerclient'  => $this->getmenu(40),
-        ];
-        $this->addViewData($data);
+        $filterService = app(FilterServiceInterface::class);
+        $viewData = $this->getCommonData();
+        $viewData['filter'] = $filterService->renderForm();
+        $viewData['filterresult'] = $filterService->getFilteredCatalog(evo()->documentIdentifier);
+        $this->addViewData($viewData);
     }
 }

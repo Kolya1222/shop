@@ -9,19 +9,10 @@
             padding: 0 20px;
         }
 
-        .text-breadcrumbs i {
-            font-size: 0.8rem;
-            color: var(--border-light);
-        }
-
-        .text-breadcrumbs .current {
-            color: var(--deep-green);
-            font-weight: 500;
-        }
-
         /* Заголовок страницы */
         .text-page-header {
-            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .text-page-header h1 {
@@ -38,8 +29,6 @@
             flex-wrap: wrap;
             color: var(--light-graphite);
             font-size: 1rem;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-light);
         }
 
         .text-page-meta i {
@@ -682,6 +671,460 @@
                 flex-wrap: wrap;
             }
         }
+
+        /* Заголовки */
+        .content-title {
+            font-size: 2.2rem;
+            color: var(--deep-green, #1a4b3c);
+            margin: 30px 0 20px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .content-subtitle {
+            font-size: 1.6rem;
+            color: var(--deep-green, #1a4b3c);
+            margin: 25px 0 15px;
+            font-weight: 600;
+        }
+
+        .content-small-title {
+            font-size: 1.2rem;
+            color: var(--fresh-green, #2e7d5e);
+            margin: 20px 0 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Текст */
+        .content-text {
+            color: var(--graphite, #334155);
+            line-height: 1.7;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .content-lead {
+            font-size: 1.2rem;
+            color: var(--deep-green, #1a4b3c);
+            font-weight: 500;
+            line-height: 1.6;
+            margin: 20px 0;
+            padding: 15px 20px;
+            background: var(--sage, #f0f7f4);
+            border-radius: 16px;
+            border-left: 4px solid var(--fresh-green, #2e7d5e);
+        }
+
+        /* Сетки */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .content-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .content-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        /* Карточки */
+        .content-card {
+            background: var(--white, #ffffff);
+            border: 1px solid var(--border-light, #e2e8f0);
+            border-radius: 24px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: var(--fresh-green, #2e7d5e);
+        }
+
+        .content-card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+
+        .content-card-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--sage, #f0f7f4);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--fresh-green, #2e7d5e);
+            font-size: 1.8rem;
+        }
+
+        .content-card-title {
+            font-size: 1.3rem;
+            color: var(--deep-green, #1a4b3c);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .content-card-text {
+            color: var(--graphite, #334155);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* Списки */
+        .content-list {
+            margin: 20px 0 20px 25px;
+        }
+
+        .content-list li {
+            color: var(--graphite, #334155);
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .content-list li::marker {
+            color: var(--fresh-green, #2e7d5e);
+        }
+
+        .content-list-check {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .content-list-check li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+        }
+
+        .content-list-check li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--fresh-green, #2e7d5e);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Контактные данные */
+        .content-contact-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            background: var(--white, #ffffff);
+            border-radius: 16px;
+            border: 1px solid var(--border-light, #e2e8f0);
+            transition: all 0.2s;
+        }
+
+        .content-contact-item:hover {
+            border-color: var(--fresh-green, #2e7d5e);
+            background: var(--sage, #f0f7f4);
+        }
+
+        .content-contact-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--sage, #f0f7f4);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fresh-green, #2e7d5e);
+            font-size: 1.2rem;
+        }
+
+        .content-contact-info {
+            flex: 1;
+            color: var(--graphite, #334155);
+            text-decoration: none;
+        }
+
+        .content-contact-info a {
+            color: var(--fresh-green, #2e7d5e);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .content-contact-info a:hover {
+            border-bottom-color: var(--fresh-green, #2e7d5e);
+        }
+
+        /* Таблицы */
+        .content-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-light, #e2e8f0);
+        }
+
+        .content-table th {
+            background: var(--deep-green, #1a4b3c);
+            color: white;
+            padding: 15px 20px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .content-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-light, #e2e8f0);
+        }
+
+        .content-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .content-table tr:nth-child(even) {
+            background: var(--sage, #f0f7f4);
+        }
+
+        /* Цитаты */
+        .content-quote {
+            margin: 30px 0;
+            padding: 30px 40px;
+            background: var(--sage, #f0f7f4);
+            border-radius: 24px;
+            font-style: italic;
+            color: var(--deep-green, #1a4b3c);
+            font-size: 1.1rem;
+            position: relative;
+            border-left: 4px solid var(--fresh-green, #2e7d5e);
+        }
+
+        .content-quote-author {
+            display: block;
+            margin-top: 15px;
+            color: var(--light-graphite, #64748b);
+            font-style: normal;
+            font-size: 0.95rem;
+        }
+
+        /* Информационные блоки */
+        .content-info-box {
+            background: var(--sage, #f0f7f4);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 1px solid var(--border-light, #e2e8f0);
+        }
+
+        .content-info-box.success {
+            background: #d1fae5;
+            border-color: var(--fresh-green, #2e7d5e);
+        }
+
+        .content-info-box.warning {
+            background: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .content-info-box.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        /* Кнопки */
+        .content-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--deep-green, #1a4b3c);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+            font-size: 1rem;
+        }
+
+        .content-btn:hover {
+            background: var(--fresh-green, #2e7d5e);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(46, 125, 94, 0.2);
+            color: white;
+        }
+
+        .content-btn-outline {
+            background: transparent;
+            border: 2px solid var(--deep-green, #1a4b3c);
+            color: var(--deep-green, #1a4b3c);
+        }
+
+        .content-btn-outline:hover {
+            background: var(--deep-green, #1a4b3c);
+            color: white;
+        }
+
+        .content-btn-small {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+        }
+
+        .content-btn-large {
+            padding: 16px 36px;
+            font-size: 1.1rem;
+        }
+
+        /* Изображения */
+        .content-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 24px;
+            margin: 30px 0;
+            border: 1px solid var(--border-light, #e2e8f0);
+        }
+
+        .content-image-left {
+            float: left;
+            margin: 0 30px 20px 0;
+            max-width: 300px;
+            border-radius: 20px;
+        }
+
+        .content-image-right {
+            float: right;
+            margin: 0 0 20px 30px;
+            max-width: 300px;
+            border-radius: 20px;
+        }
+
+        .content-image-caption {
+            text-align: center;
+            color: var(--light-graphite, #64748b);
+            font-size: 0.9rem;
+            margin-top: -20px;
+            margin-bottom: 30px;
+        }
+
+        /* Разделители */
+        .content-divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--fresh-green, #2e7d5e), transparent);
+            margin: 40px 0;
+        }
+
+        .content-divider-light {
+            height: 1px;
+            background: var(--border-light, #e2e8f0);
+            margin: 30px 0;
+        }
+
+        /* Теги */
+        .content-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .content-tag {
+            background: var(--sage, #f0f7f4);
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: var(--deep-green, #1a4b3c);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .content-tag:hover {
+            background: var(--fresh-green, #2e7d5e);
+            color: white;
+            border-color: var(--fresh-green, #2e7d5e);
+        }
+
+        /* Хлебные крошки */
+        .content-breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            color: var(--light-graphite, #64748b);
+            font-size: 0.95rem;
+        }
+
+        .content-breadcrumbs a {
+            color: var(--fresh-green, #2e7d5e);
+            text-decoration: none;
+        }
+
+        .content-breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        .content-breadcrumbs i {
+            font-size: 0.7rem;
+            color: var(--border-light, #e2e8f0);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .content-title {
+                font-size: 1.8rem;
+            }
+
+            .content-subtitle {
+                font-size: 1.4rem;
+            }
+
+            .content-grid-2,
+            .content-grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .content-image-left,
+            .content-image-right {
+                float: none;
+                max-width: 100%;
+                margin: 20px 0;
+            }
+
+            .content-quote {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-title {
+                font-size: 1.5rem;
+            }
+
+            .content-contact-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
     </style>
 @endsection
 
@@ -693,7 +1136,6 @@
                 <h1>{{ $pagetitle }}</h1>
                 <div class="text-page-meta">
                     <span><i class="fas fa-calendar-alt"></i> {{ date('d.m.Y H:i', strtotime($createdon)) }}</span>
-                    <span><i class="fas fa-clock"></i>7 мин чтения</span>
                 </div>
             </div>
 
@@ -732,60 +1174,13 @@
             <!-- Теги -->
             <div class="text-page-tags">
                 @php
-                    $tag=json_decode($tag, true)['fieldValue'] ?? [];
+                    $tag = json_decode($tag, true)['fieldValue'] ?? [];
                 @endphp
                 @forelse ($tag as $item)
-                    <a href="#" class="text-tag">#{{$item['value']}}</a>
+                    <a href="#" class="text-tag">#{{ $item['value'] }}</a>
                 @empty
-                    <span>Скоро тут появятся теги</span> 
+                    <span>Скоро тут появятся теги</span>
                 @endforelse
-            </div>
-
-            <!-- Кнопки шаринга -->
-            <div class="text-page-share">
-                <span class="share-label">Поделиться:</span>
-                <div class="share-icons">
-                    <a href="#" class="share-icon"><i class="fab fa-telegram"></i></a>
-                    <a href="#" class="share-icon"><i class="fab fa-vk"></i></a>
-                    <a href="#" class="share-icon"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="share-icon"><i class="fab fa-facebook"></i></a>
-                </div>
-            </div>
-
-            <!-- Похожие статьи -->
-            <div class="related-articles">
-                <h2>Похожие статьи</h2>
-                <div class="related-grid">
-                    <div class="related-card">
-                        <div class="related-image">
-                            <i class="fas fa-microchip"></i>
-                        </div>
-                        <div class="related-content">
-                            <div class="related-title">Топ-10 процессоров для игр в 2025</div>
-                            <div class="related-date"><i class="fas fa-calendar-alt"></i> 10 марта 2025</div>
-                        </div>
-                    </div>
-
-                    <div class="related-card">
-                        <div class="related-image">
-                            <i class="fas fa-keyboard"></i>
-                        </div>
-                        <div class="related-content">
-                            <div class="related-title">Как выбрать игровую клавиатуру</div>
-                            <div class="related-date"><i class="fas fa-calendar-alt"></i> 5 марта 2025</div>
-                        </div>
-                    </div>
-
-                    <div class="related-card">
-                        <div class="related-image">
-                            <i class="fas fa-mouse"></i>
-                        </div>
-                        <div class="related-content">
-                            <div class="related-title">Обзор игровых мышей 2025</div>
-                            <div class="related-date"><i class="fas fa-calendar-alt"></i> 1 марта 2025</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

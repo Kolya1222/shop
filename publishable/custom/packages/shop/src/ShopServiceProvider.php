@@ -3,6 +3,8 @@
 namespace EvolutionCMS\Shop;
 
 use EvolutionCMS\ServiceProvider;
+use EvolutionCMS\Shop\Services\Filter\EFilterService;
+use EvolutionCMS\Shop\Interfaces\FilterServiceInterface;
 
 class ShopServiceProvider extends ServiceProvider
 {
@@ -14,7 +16,12 @@ class ShopServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
+        $this->loadPluginsFrom(
+            dirname(__DIR__) . '/plugins/'
+        );
+        $this->app->singleton(FilterServiceInterface::class, function ($app) {
+            return new EFilterService($app);
+        });
     }
 
     /**
@@ -22,8 +29,5 @@ class ShopServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
-    {
-
-    }
+    public function boot() {}
 }

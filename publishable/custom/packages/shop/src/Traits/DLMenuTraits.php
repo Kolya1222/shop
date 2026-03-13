@@ -2,10 +2,6 @@
 
 namespace EvolutionCMS\Shop\Traits;
 
-/**
- * Трейт для получения
- * Меню (DLMenu)
- */
 trait DLMenuTraits
 {
     public function getmenu($parents)

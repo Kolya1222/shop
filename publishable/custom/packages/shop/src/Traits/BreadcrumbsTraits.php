@@ -2,10 +2,6 @@
 
 namespace EvolutionCMS\Shop\Traits;
 
-/**
- * Трейт для использования
- * Хлебных крошек
- */
 trait BreadcrumbsTraits
 {
     public function getbreadcrumbs()

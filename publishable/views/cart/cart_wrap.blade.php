@@ -19,12 +19,12 @@
                     <span>{{ evo()->runSnippet('PriceFormat', ['price' => $data['total']]) }}</span>
                 </div>
 
-                <button class="btn-checkout">
+                <button class="btn-checkout" onclick="openOrderModal()">
                     <i class="fas fa-lock"></i> Оформить заказ
                 </button>
             </div>
         </div>
-        {!! $data['subtotals'] !!}
+
     </div>
 @else
     <div class="empty-cart">

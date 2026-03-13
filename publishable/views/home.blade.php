@@ -5,21 +5,21 @@
         <section class="hero">
             <div class="container">
                 <div class="hero-content">
-                    <h1>{{evo()->getConfig('site_name')}}</h1>
+                    <h1>@config('site_name')</h1>
                     <p>{{$introtext}}</p>
                     <a href=@makeUrl(2) class="btn-primary"><i class="fas fa-arrow-right"></i> Начать подбор</a>
                     
                     <div class="hero-stats">
                         <div class="stat-item">
-                            <h3>{{evo()->getConfig('client_field_age')}}+</h3>
+                            <h3>@config('client_field_age')+</h3>
                             <p>лет на рынке</p>
                         </div>
                         <div class="stat-item">
-                            <h3>{{evo()->getConfig('client_field_client')}}k+</h3>
+                            <h3>@config('client_field_client')k+</h3>
                             <p>довольных клиентов</p>
                         </div>
                         <div class="stat-item">
-                            <h3>{{evo()->getConfig('client_field_brand')}}+</h3>
+                            <h3>@config('client_field_brand')+</h3>
                             <p>брендов</p>
                         </div>
                     </div>

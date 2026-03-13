@@ -200,6 +200,96 @@
             margin-right: 6px;
         }
 
+        /* Опции товара */
+        .product-options {
+            border: 1px solid var(--border-light);
+            border-radius: 32px;
+            padding: 28px;
+            margin: 16px 0;
+        }
+
+        .product-options h3 {
+            font-size: 1.3rem;
+            color: var(--deep-green);
+            margin-bottom: 20px;
+        }
+
+        .options-group {
+            margin-bottom: 24px;
+        }
+
+        .options-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .options-label {
+            display: block;
+            font-weight: 600;
+            color: var(--graphite);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .options-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .option-item {
+            position: relative;
+        }
+
+        .option-item input[type="radio"],
+        .option-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .option-item label {
+            display: block;
+            padding: 10px 20px;
+            background: var(--white);
+            border: 2px solid var(--border-light);
+            border-radius: 40px;
+            font-size: 0.95rem;
+            color: var(--graphite);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .option-item input[type="radio"]:checked+label,
+        .option-item input[type="checkbox"]:checked+label {
+            background: var(--deep-green);
+            border-color: var(--deep-green);
+            color: white;
+        }
+
+        .option-item label:hover {
+            border-color: var(--fresh-green);
+        }
+
+        .option-item.disabled label {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--sage);
+        }
+
+        .option-price {
+            font-size: 0.85rem;
+            color: var(--fresh-green);
+            margin-left: 4px;
+        }
+
+        .option-item input[type="radio"]:checked+label .option-price,
+        .option-item input[type="checkbox"]:checked+label .option-price {
+            color: white;
+        }
+
         /* Количество */
         .quantity-selector {
             display: flex;
@@ -522,6 +612,15 @@
             .gallery-main i {
                 font-size: 8rem;
             }
+
+            .options-list {
+                gap: 8px;
+            }
+
+            .option-item label {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
         }
 
         @media (max-width: 480px) {
@@ -552,6 +651,10 @@
                 flex-direction: column;
                 gap: 20px;
             }
+
+            .options-group {
+                margin-bottom: 16px;
+            }
         }
     </style>
 @endsection
@@ -567,13 +670,13 @@
                     $images = json_decode($product_gallery, true)['fieldValue'] ?? [];
                 @endphp
                 @if (empty($images[0]['image']))
-                <div class="gallery-main">
-                    <i class="fas fa-laptop"></i>
-                </div>    
+                    <div class="gallery-main">
+                        <i class="fas fa-laptop"></i>
+                    </div>
                 @else
-                <div class="gallery-main">
-                    <i class="{{ $images[0]['image'] ?? '' }}"></i>
-                </div> 
+                    <div class="gallery-main">
+                        <i class="{{ $images[0]['image'] ?? '' }}"></i>
+                    </div>
                 @endif
                 <div class="gallery-thumbnails">
                     @forelse ($images as $item)
@@ -590,26 +693,9 @@
 
             <!-- Правая колонка: информация -->
             <form class="product-info" action="#" data-commerce-action="add">
-                <input type="hidden" name="id" value="{{$id}}" />
+                <input type="hidden" name="id" value="{{ $id }}" />
                 <div class="product-info-header">
                     <h1>{{ $pagetitle }}</h1>
-                    <div class="product-actions">
-                        <button class="product-action-btn"><i class="far fa-heart"></i></button>
-                        <button class="product-action-btn"><i class="far fa-share-square"></i></button>
-                    </div>
-                </div>
-
-                <!-- Рейтинг -->
-                <div class="product-rating">
-                    <div class="stars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </div>
-                    <span class="rating-value">4.8</span>
-                    <span class="rating-reviews">156 отзывов</span>
                 </div>
 
                 <!-- Цена -->
@@ -617,8 +703,7 @@
                     <div class="current-price">
                         <span class="price">{{ evo()->runSnippet('PriceFormat', ['price' => $price]) }}</span>
                         @if ($old_price)
-                            <span
-                                class="old-price">{{ evo()->runSnippet('PriceFormat', ['price' => $old_price]) }}</span>
+                            <span class="old-price">{{ evo()->runSnippet('PriceFormat', ['price' => $old_price]) }}</span>
                             <span class="discount-badge">-10%</span>
                         @endif
                     </div>
@@ -629,20 +714,50 @@
                     </div>
                 </div>
 
+                <!-- Опции товара -->
+                @if (!empty($options))
+                    <div class="product-options">
+                        <h3>Выберите опции</h3>
+                        @php
+                            $options = json_decode($options, true)['fieldValue'] ?? [];
+                        @endphp
+                        <!-- Группа опций -->
+                        <div class="options-group">
+                            <div class="options-list">
+                                @forelse ($options as $item)
+                                    <div class="option-item">
+                                        <input type="checkbox" name="options[options_{{ $loop->iteration }}]"
+                                            id="options_{{ $loop->iteration }}">
+                                        <label for="options_{{ $loop->iteration }}">
+                                            {{ $item['name'] }}
+                                            <span class="option-price">(+{{ $item['value'] }} ₽)</span>
+                                        </label>
+                                    </div>
+                                @empty
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <!-- Количество -->
                 <div class="quantity-selector">
                     <span class="quantity-label">Количество:</span>
                     <div class="quantity-controls">
-                        <button class="quantity-btn"><i class="fas fa-minus"></i></button>
-                        <input type="text" name="count" class="quantity-input" value="1">
-                        <button class="quantity-btn"><i class="fas fa-plus"></i></button>
+                        <button type="button" class="quantity-btn" onclick="decrementQuantity()"><i
+                                class="fas fa-minus"></i></button>
+                        <input type="number" name="count" class="quantity-input" value="1" min="1"
+                            max="99" step="1">
+                        <button type="button" class="quantity-btn" onclick="incrementQuantity()"><i
+                                class="fas fa-plus"></i></button>
                     </div>
                 </div>
 
                 <!-- Кнопки покупки -->
                 <div class="purchase-buttons">
-                    <button class="btn-buy"><i class="fas fa-bolt"></i> Купить сейчас</button>
-                    <button type="submit" class="btn-cart"><i class="fas fa-shopping-cart"></i> В корзину</button>
+                    <button type="submit" name="action" value="buy" class="btn-buy"><i class="fas fa-bolt"></i> Купить
+                        сейчас</button>
+                    <button type="submit" name="action" value="cart" class="btn-cart"><i
+                            class="fas fa-shopping-cart"></i> В корзину</button>
                 </div>
 
                 <!-- Краткие характеристики -->
@@ -672,8 +787,7 @@
             <div class="tabs-header">
                 <button class="tab-btn active" onclick="switchTab(0)">Описание</button>
                 <button class="tab-btn" onclick="switchTab(1)">Характеристики</button>
-                <button class="tab-btn" onclick="switchTab(2)">Отзывы (156)</button>
-                <button class="tab-btn" onclick="switchTab(3)">Доставка и оплата</button>
+                <button class="tab-btn" onclick="switchTab(2)">Опции</button>
             </div>
 
             <div class="tab-content">
@@ -695,70 +809,29 @@
                     </div>
                 </div>
                 <div class="tab-pane" id="tab-2">
-                    <div class="reviews-summary">
-                        <div class="average-rating">
-                            <div class="average-number">4.8</div>
-                            <div class="average-stars">
-                                <i class="fas fa-star" style="color: #fbbf24;"></i>
-                                <i class="fas fa-star" style="color: #fbbf24;"></i>
-                                <i class="fas fa-star" style="color: #fbbf24;"></i>
-                                <i class="fas fa-star" style="color: #fbbf24;"></i>
-                                <i class="fas fa-star-half-alt" style="color: #fbbf24;"></i>
+                    <h3 style="margin-bottom: 16px; color: var(--deep-green);">Все опции</h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
+                        <div>
+                            <h4 style="color: var(--deep-green); margin-bottom: 12px;">Название группы опций</h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Значение
+                                    опции 1 (+500 ₽)</span>
+                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Значение
+                                    опции 2 (+300 ₽)</span>
+                                <span
+                                    style="background: var(--sage); padding: 8px 16px; border-radius: 40px; opacity: 0.5;">Недоступно</span>
                             </div>
-                            <div>156 отзывов</div>
                         </div>
-                        <div class="rating-bars">
-                            <div class="rating-bar-item">
-                                <span class="rating-bar-label">5</span>
-                                <div class="rating-bar">
-                                    <div class="rating-bar-fill" style="width: 75%"></div>
-                                </div>
-                                <span class="rating-bar-count">117</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span class="rating-bar-label">4</span>
-                                <div class="rating-bar">
-                                    <div class="rating-bar-fill" style="width: 20%"></div>
-                                </div>
-                                <span class="rating-bar-count">31</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span class="rating-bar-label">3</span>
-                                <div class="rating-bar">
-                                    <div class="rating-bar-fill" style="width: 4%"></div>
-                                </div>
-                                <span class="rating-bar-count">6</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span class="rating-bar-label">2</span>
-                                <div class="rating-bar">
-                                    <div class="rating-bar-fill" style="width: 1%"></div>
-                                </div>
-                                <span class="rating-bar-count">2</span>
-                            </div>
-                            <div class="rating-bar-item">
-                                <span class="rating-bar-label">1</span>
-                                <div class="rating-bar">
-                                    <div class="rating-bar-fill" style="width: 0%"></div>
-                                </div>
-                                <span class="rating-bar-count">0</span>
+                        <div>
+                            <h4 style="color: var(--deep-green); margin-bottom: 12px;">Дополнительные услуги</h4>
+                            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
+                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Доп. услуга
+                                    1 (+1000 ₽)</span>
+                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Доп. услуга
+                                    2 (+700 ₽)</span>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="tab-pane" id="tab-3">
-                    <h3 style="margin-bottom: 16px; color: var(--deep-green);">Доставка и оплата</h3>
-                    <ul style="list-style: none;">
-                        <li style="margin-bottom: 12px;"><i class="fas fa-check"
-                                style="color: var(--fresh-green); margin-right: 10px;"></i> Курьером по Москве — сегодня,
-                            500 ₽</li>
-                        <li style="margin-bottom: 12px;"><i class="fas fa-check"
-                                style="color: var(--fresh-green); margin-right: 10px;"></i> Самовывоз (22 пункта) —
-                            бесплатно</li>
-                        <li style="margin-bottom: 12px;"><i class="fas fa-check"
-                                style="color: var(--fresh-green); margin-right: 10px;"></i> Почтой России — 3-7 дней, 350 ₽
-                        </li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -770,7 +843,7 @@
                 @forelse ($products as $item)
                     @include('parts.itemcard', $item)
                 @empty
-                    <div>В ближайщее время тут появятся товары</div>
+                    <div>В ближайшее время тут появятся товары</div>
                 @endforelse
             </div>
         </div>
@@ -810,25 +883,38 @@
 
             calculateDiscount();
 
-            const input = document.querySelector('.quantity-input');
-            const minus = document.querySelector('.quantity-btn:first-child');
-            const plus = document.querySelector('.quantity-btn:last-child');
+            window.decrementQuantity = function() {
+                const input = document.querySelector('.quantity-input');
+                const currentValue = parseInt(input.value) || 1;
+                if (currentValue > 1) {
+                    input.value = currentValue - 1;
+                }
+            };
 
-            if (minus && plus && input) {
-                minus.addEventListener('click', () => {
-                    input.value = Math.max(1, parseInt(input.value) - 1);
-                });
+            window.incrementQuantity = function() {
+                const input = document.querySelector('.quantity-input');
+                const currentValue = parseInt(input.value) || 1;
+                if (currentValue < 99) {
+                    input.value = currentValue + 1;
+                }
+            };
 
-                plus.addEventListener('click', () => {
-                    input.value = parseInt(input.value) + 1;
+            const quantityInput = document.querySelector('.quantity-input');
+            if (quantityInput) {
+                quantityInput.addEventListener('change', function() {
+                    let value = parseInt(this.value) || 1;
+                    value = Math.max(1, Math.min(99, value));
+                    this.value = value;
                 });
             }
 
-            function switchTab(tabIndex) {
+            window.switchTab = function(tabIndex) {
                 const tabButtons = document.querySelectorAll('.tab-btn');
                 tabButtons.forEach(btn => btn.classList.remove('active'));
 
-                tabButtons[tabIndex].classList.add('active');
+                if (tabButtons[tabIndex]) {
+                    tabButtons[tabIndex].classList.add('active');
+                }
 
                 const tabPanes = document.querySelectorAll('.tab-pane');
                 tabPanes.forEach(pane => pane.classList.remove('active'));
@@ -837,7 +923,7 @@
                 if (activePane) {
                     activePane.classList.add('active');
                 }
-            }
+            };
 
             const tabButtons = document.querySelectorAll('.tab-btn');
             tabButtons.forEach((button, index) => {
@@ -847,6 +933,7 @@
                     switchTab(index);
                 });
             });
+
             const fullSpecsLink = document.querySelector('.full-specs-link');
             if (fullSpecsLink) {
                 fullSpecsLink.addEventListener('click', (e) => {
@@ -861,37 +948,6 @@
                     }
                 });
             }
-            const ratingReviews = document.querySelector('.rating-reviews');
-            if (ratingReviews) {
-                ratingReviews.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    switchTab(2);
-                    const tabsHeader = document.querySelector('.tabs-header');
-                    if (tabsHeader) {
-                        tabsHeader.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-
-                ratingReviews.style.cursor = 'pointer';
-            }
-
-            function openTabFromHash() {
-                const hash = window.location.hash;
-                if (hash === '#reviews' || hash === '#отзывы') {
-                    switchTab(2);
-                } else if (hash === '#specs' || hash === '#характеристики') {
-                    switchTab(1);
-                } else if (hash === '#delivery' || hash === '#доставка') {
-                    switchTab(3);
-                } else if (hash === '#description' || hash === '#описание') {
-                    switchTab(0);
-                }
-            }
-            openTabFromHash();
-            window.addEventListener('hashchange', openTabFromHash);
         });
     </script>
 @endsection

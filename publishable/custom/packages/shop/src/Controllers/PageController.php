@@ -6,74 +6,54 @@ use EvolutionCMS\TemplateController;
 use EvolutionCMS\Shop\Traits\DLMenuTraits;
 use EvolutionCMS\Shop\Traits\BreadcrumbsTraits;
 use EvolutionCMS\Shop\Traits\CartTraits;
+use EvolutionCMS\Shop\Traits\CommonDataTraits;
+use Illuminate\Support\Facades\Config;
 
 class PageController extends TemplateController
 {
-    use DLMenuTraits;
-    use BreadcrumbsTraits;
-    use CartTraits;
+    use DLMenuTraits, BreadcrumbsTraits, CartTraits, CommonDataTraits;
+
     public function process()
     {
-        $data = [
-            'breadcrumbs'   => $this->getbreadcrumbs(evo()->documentIdentifier),
-            'categories'    => $this->getCategoriesHit(),
-            'products'      => $this->getProducts(),
-            'headermenu'    => $this->getmenu(0),
-            'cartheader'    => $this->getCart(),
-            'footermenu'    => $this->getmenu(2),
-            'footerclient'  => $this->getmenu(40),
-        ];
-        $this->addViewData($data);
+        $viewData = $this->getCommonData();
+        $viewData['categories'] = $this->getItems('categories_hit');
+        $viewData['products'] = $this->getItems('product');
+        $this->addViewData($viewData);
     }
 
-    private function getCategoriesHit()
+    private function getItems($config)
     {
-        $result = EvolutionCMS()->runSnippet('DocLister', [
-            'parents'       => 2,
-            'depth'         => 0,
-            'tvPrefix'      => '',
-            'tvList'        => 'popular_categories',
-            'returnDLObject'=> 1,
-            'orderBy'       => 'createdon DESC'
-        ])->getDocs();
-        $categories = [];
-        foreach ($result as $item) {
-            if ($item['popular_categories']) {
-                $categories[] = [
+        $params = Config::get('Doclister.'.$config);
+        $result = evo()->runSnippet('DocLister', $params)->getDocs();
+        $data = $this->formatData($result, $config);
+        return $data;
+    }
+
+    private function formatData($result, $config)
+    {
+        $items = [];
+        if ($config == 'product') {
+            foreach ($result as $item) {
+                $items[] = [
+                    'id'            => $item['id'],
+                    'title'         => $item['pagetitle'],
+                    'price'         => $this->formatPrice($item['price']),
+                    'product_tag'   => $item['product_tag']
+                ];
+            }
+        } else {
+            foreach ($result as $item) {
+                $items[] = [
                     'id'    => $item['id'],
                     'title' => $item['pagetitle']
                 ];
             }
         }
-
-        return $categories;
+        return $items;
     }
 
-    private function getProducts()
+    private function formatPrice($price): string
     {
-        $result = EvolutionCMS()->runSnippet('DocLister', [
-            'parents'       => 2,
-            'depth'         => 3,
-            'tvPrefix'      => '',
-            'tvList'        => 'new_item, price, product_tag',
-            'returnDLObject'=> 1,
-            'orderBy'       => 'createdon DESC'
-        ])->getDocs();
-        $products = [];
-        foreach ($result as $item) {
-            if (count($products) >= 4) {
-                break;
-            }
-            if (($item['product_tag'] == "Новый") and ($item['id'] != evo()->documentIdentifier)) {
-                $products[] = [
-                    'id'            => $item['id'],
-                    'title'         => $item['pagetitle'],
-                    'price'         => EvolutionCMS()->runSnippet('PriceFormat', ['price' => $item['price']]),
-                    'product_tag'   => $item['product_tag']
-                ];
-            }
-        }
-
-        return $products;
+        return evo()->runSnippet('PriceFormat', ['price' => $price]);
     }
 }
