@@ -2,15 +2,16 @@
 
 namespace EvolutionCMS\Shop\Traits;
 
+use EvolutionCMS\Shop\Facades\Snippet;
+use Illuminate\Support\Facades\Config;
+
 trait DLMenuTraits
 {
-    public function getmenu($parents)
+    public function getMenu($parents)
     {
-        $result = evo()->runSnippet('DLMenu', [
-            'parents'       => $parents,
-            'maxDepth'      => 1,
-            'returnDLObject'=> 1,
-        ])->getMenu()[0];
+        $config = Config::get('Doclister.dlmenu');
+        $config['parents'] = $parents;
+        $result = Snippet::dlmenu($config);
         $menu = [];
         foreach ($result as $item) {
             $menu[] = [

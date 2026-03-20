@@ -29,5 +29,26 @@ class ShopServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot() {}
+    public function boot()
+    {
+        $this->registerBladeDirectives();
+    }
+
+    protected function registerBladeDirectives()
+    {
+        $directivesPath = __DIR__ . '/BladeDirectives';
+
+        if (is_dir($directivesPath)) {
+            $files = scandir($directivesPath);
+
+            foreach ($files as $file) {
+                $className = pathinfo($file, PATHINFO_FILENAME);
+                $fullClassName = "EvolutionCMS\\Shop\\BladeDirectives\\{$className}";
+
+                if (class_exists($fullClassName) && method_exists($fullClassName, 'register')) {
+                    call_user_func([$fullClassName, 'register']);
+                }
+            }
+        }
+    }
 }

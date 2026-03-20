@@ -1135,36 +1135,37 @@
             <div class="text-page-header">
                 <h1>{{ $pagetitle }}</h1>
                 <div class="text-page-meta">
-                    <span><i class="fas fa-calendar-alt"></i> {{ date('d.m.Y H:i', strtotime($createdon)) }}</span>
+                    <span><i class="fas fa-calendar-alt"></i>
+                        {{ !empty($placeholders['order_id']) ? date('d.m.Y H:i') : date('d.m.Y H:i', strtotime($createdon)) }}
+                    </span>
                 </div>
             </div>
-
-            <!-- Главное изображение -->
-            <div class="product-gallery">
-                @php
-                    $images = json_decode($product_gallery, true)['fieldValue'] ?? [];
-                @endphp
-                @if (empty($images[0]['image']))
-                    <div class="gallery-main">
-                        <i class="fas fa-laptop"></i>
-                    </div>
-                @else
+            @php
+                $images = json_decode($product_gallery, true)['fieldValue'] ?? [];
+            @endphp
+            @if (!empty($images[0]['image']))
+                <!-- Главное изображение -->
+                <div class="product-gallery">
                     <div class="gallery-main">
                         <i class="{{ $images[0]['image'] ?? '' }}"></i>
                     </div>
-                @endif
-                <div class="gallery-thumbnails">
-                    @forelse ($images as $item)
-                        <div class="gallery-thumb {{ $loop->first ? 'active' : '' }}" data-icon="{{ $item['image'] }}">
-                            <i class="{{ $item['image'] }}"></i>
-                        </div>
-                    @empty
-                        <div class="gallery-thumb active" data-icon="fas fa-laptop">
-                            <i class="fas fa-laptop"></i>
-                        </div>
-                    @endforelse
+                    <div class="gallery-thumbnails">
+                        @forelse ($images as $item)
+                            <div class="gallery-thumb {{ $loop->first ? 'active' : '' }}" data-icon="{{ $item['image'] }}">
+                                <i class="{{ $item['image'] }}"></i>
+                            </div>
+                        @empty
+                            <div class="gallery-thumb active" data-icon="fas fa-laptop">
+                                <i class="fas fa-laptop"></i>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
-            </div>
+            @endif
+
+            @if (!empty($placeholders) && !empty($placeholders['order_id']))
+                @include('cart.thanks', $placeholders)
+            @endif
 
             <!-- Текстовое содержание -->
             <div class="text-page-content">
@@ -1172,16 +1173,16 @@
             </div>
 
             <!-- Теги -->
-            <div class="text-page-tags">
-                @php
-                    $tag = json_decode($tag, true)['fieldValue'] ?? [];
-                @endphp
-                @forelse ($tag as $item)
-                    <a href="#" class="text-tag">#{{ $item['value'] }}</a>
-                @empty
-                    <span>Скоро тут появятся теги</span>
-                @endforelse
-            </div>
+            @if ($tag != '[]')
+                <div class="text-page-tags">
+                    @php
+                        $tag = json_decode($tag, true)['fieldValue'] ?? [];
+                    @endphp
+                    @foreach ($tag as $item)
+                        <a href="#" class="text-tag">#{{ $item['value'] }}</a>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 @endsection

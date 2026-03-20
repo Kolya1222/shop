@@ -2,31 +2,41 @@
 
 namespace EvolutionCMS\Shop\Controllers;
 
-use EvolutionCMS\TemplateController;
-use EvolutionCMS\Shop\Traits\DLMenuTraits;
-use EvolutionCMS\Shop\Traits\BreadcrumbsTraits;
-use EvolutionCMS\Shop\Traits\CartTraits;
-use EvolutionCMS\Shop\Traits\CommonDataTraits;
 use Illuminate\Support\Facades\Config;
+use EvolutionCMS\Shop\Facades\Snippet;
 
-class PageController extends TemplateController
+class PageController extends BaseController
 {
-    use DLMenuTraits, BreadcrumbsTraits, CartTraits, CommonDataTraits;
-
     public function process()
     {
-        $viewData = $this->getCommonData();
-        $viewData['categories'] = $this->getItems('categories_hit');
-        $viewData['products'] = $this->getItems('product');
-        $this->addViewData($viewData);
+        parent::process();
+        $this->addViewData([
+            'categories'    => $this->getItems('categories_hit'),
+            'products'      => $this->getItems('product'),
+            'placeholders'  => $this->getPlaceholders()
+        ]);
     }
 
     private function getItems($config)
     {
-        $params = Config::get('Doclister.'.$config);
-        $result = evo()->runSnippet('DocLister', $params)->getDocs();
-        $data = $this->formatData($result, $config);
-        return $data;
+        $params = Config::get('Doclister.' . $config);
+        $data = Snippet::docLister($params);
+        $result = $this->formatData($data, $config);
+        return $result;
+    }
+
+    private function getPlaceholders()
+    {
+        return [
+            'order_id'      => evo()->getPlaceholder('commerce_order.id'),
+            'order_name'    => evo()->getPlaceholder('commerce_order.name'),
+            'order_phone'   => evo()->getPlaceholder('commerce_order.phone'),
+            'order_email'   => evo()->getPlaceholder('commerce_order.email'),
+            'order_amount'  => evo()->getPlaceholder('commerce_order.amount'),
+            'order_currency'=> evo()->getPlaceholder('commerce_order.currency'),
+            'payment_id'    => evo()->getPlaceholder('commerce_payment.id'),
+            'payment_amount'=> evo()->getPlaceholder('commerce_payment.amount'),
+        ];
     }
 
     private function formatData($result, $config)
@@ -37,7 +47,7 @@ class PageController extends TemplateController
                 $items[] = [
                     'id'            => $item['id'],
                     'title'         => $item['pagetitle'],
-                    'price'         => $this->formatPrice($item['price']),
+                    'price'         => $item['price'],
                     'product_tag'   => $item['product_tag']
                 ];
             }
@@ -50,10 +60,5 @@ class PageController extends TemplateController
             }
         }
         return $items;
-    }
-
-    private function formatPrice($price): string
-    {
-        return evo()->runSnippet('PriceFormat', ['price' => $price]);
     }
 }

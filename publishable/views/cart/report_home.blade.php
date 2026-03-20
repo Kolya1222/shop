@@ -17,12 +17,11 @@
 <h4>Состав заказа:</h4>
 
 {!! evo()->runSnippet('Cart', [
-    'templatePath' => 'views/',
     'instance' => 'products',
     'noneWrapOuter' => 1,
     'tvPrefix' => '',
-    'ownerTpl' => '@B_FILE: cart/cart_wrap',
-    'tpl' => '@B_FILE: cart/cart_row',
+    'ownerTpl' => '@VIEW: cart.cart_wrap',
+    'tpl' => '@VIEW: cart.cart_row',
     'tvList' => ['product_gallery'],
-	'urlScheme'=>'full'
+    'urlScheme' => 'full',
 ]) !!}

@@ -2,15 +2,15 @@
 
 namespace EvolutionCMS\Shop\Traits;
 
+use EvolutionCMS\Shop\Facades\Snippet;
+use Illuminate\Support\Facades\Config;
+
 trait BreadcrumbsTraits
 {
-    public function getbreadcrumbs()
+    public function getBreadcrumbs()
     {
-        $result = evo()->runSnippet('DLCrumbs', [
-            'showCurrent'   => 1,
-            'hideMain'      => 0,
-            'config'        => 'crumbs:custom'
-        ]);
+        $config = Config::get('Doclister.breadcrumbs');
+        $result = Snippet::dlcrumbs($config);
         return ($result);
     }
 }

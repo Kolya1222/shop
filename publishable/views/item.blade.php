@@ -701,9 +701,9 @@
                 <!-- Цена -->
                 <div class="product-price-block">
                     <div class="current-price">
-                        <span class="price">{{ evo()->runSnippet('PriceFormat', ['price' => $price]) }}</span>
+                        <span class="price">@price($price)</span>
                         @if ($old_price)
-                            <span class="old-price">{{ evo()->runSnippet('PriceFormat', ['price' => $old_price]) }}</span>
+                            <span class="old-price">@price($old_price)</span>
                             <span class="discount-badge">-10%</span>
                         @endif
                     </div>
@@ -715,7 +715,7 @@
                 </div>
 
                 <!-- Опции товара -->
-                @if (!empty($options))
+                @if (!empty($options) and $options != '[]')
                     <div class="product-options">
                         <h3>Выберите опции</h3>
                         @php
@@ -754,10 +754,10 @@
 
                 <!-- Кнопки покупки -->
                 <div class="purchase-buttons">
-                    <button type="submit" name="action" value="buy" class="btn-buy"><i class="fas fa-bolt"></i> Купить
-                        сейчас</button>
-                    <button type="submit" name="action" value="cart" class="btn-cart"><i
-                            class="fas fa-shopping-cart"></i> В корзину</button>
+                    <button type="submit" name="action" value="cart" class="btn-cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        В корзину
+                    </button>
                 </div>
 
                 <!-- Краткие характеристики -->

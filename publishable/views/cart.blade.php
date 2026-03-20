@@ -929,7 +929,7 @@
                     корзину</button>
             </div>
         </div>
-        {!! $cart !!}
+        {!! $carts !!}
         <div class="modal-overlay" id="orderModal">
             <div class="modal-container">
                 <!-- Заголовок модалки -->
@@ -939,7 +939,65 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                {!!$order!!}
+                <div class="form-wrapper">
+                    <form class="modal-form">
+                        <input type="hidden" name="formid" value="order">
+                        <h3>Контактные данные</h3>
+
+                        <div class="form-group" data-field="name">
+                            <label for="name">Ваше имя <span class="required">*</span></label>
+                            <input type="text" id="name" name="name" class="form-control"
+                                placeholder="Иван Иванов">
+                        </div>
+
+                        <div class="form-group" data-field="email">
+                            <label for="email">Email <span class="required">*</span></label>
+                            <input type="email" id="email" name="email" class="form-control"
+                                placeholder="ivan@example.com">
+                        </div>
+
+                        <div class="form-group" data-field="phone">
+                            <label for="phone">Телефон <span class="required">*</span></label>
+                            <input type="tel" id="phone" name="phone" class="form-control"
+                                placeholder="+7 (999) 123-45-67">
+                        </div>
+
+                        <h3>Способ доставки</h3>
+                        <div class="delivery-options" data-field="delivery_method">
+                            @forelse ($deliveries as $item)
+                                @include('cart.deliveryitem', $item)
+                            @empty
+                                <span>Скоро тут появятся способы доставки</span>
+                            @endforelse
+                        </div>
+
+                        <!-- Способ оплаты -->
+                        <h3>Способ оплаты</h3>
+                        <div class="payment-options" data-field="payment_method">
+                            @forelse ($payments as $key => $item)
+                                @include('cart.paymentitem', ['title' => $item['title'], 'code' => $key])
+                            @empty
+                                <span>Скоро тут появятся способы оплаты</span>
+                            @endforelse
+                        </div>
+
+                        <!-- Комментарий -->
+                        <div class="form-group" data-field="comment">
+                            <label for="comment">Комментарий к заказу</label>
+                            <textarea id="comment" name="comment" class="form-control" rows="2" placeholder="Дополнительная информация"></textarea>
+                        </div>
+
+                        <!-- Согласие -->
+                        <div class="form-check" data-field="agreement">
+                            <input type="checkbox" id="agreement" name="agreement" class="form-control" checked required>
+                            <label for="agreement">Я согласен на обработку персональных данных</label>
+                        </div>
+                        <!-- Кнопка отправки -->
+                        <button type="submit" name="submit" class="modal-submit-btn">
+                            <span>Подтвердить заказ</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -947,6 +1005,11 @@
 @endsection
 
 @section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new FormSender();
+        })
+    </script>
     <script>
         // Функции открытия/закрытия модалки
         function openOrderModal() {
@@ -960,8 +1023,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('orderForm');
-            const submitBtn = document.getElementById('submitBtn');
             const phoneInput = document.getElementById('phone');
 
             // Маска для телефона
@@ -982,9 +1043,11 @@
                     } else if (value.length <= 7) {
                         value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7);
                     } else if (value.length <= 9) {
-                        value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7, 9);
+                        value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value
+                            .substring(7, 9);
                     } else {
-                        value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value.substring(7, 9) + '-' + value.substring(9, 11);
+                        value = '+7 (' + value.substring(1, 4) + ') ' + value.substring(4, 7) + '-' + value
+                            .substring(7, 9) + '-' + value.substring(9, 11);
                     }
 
                     e.target.value = value;
@@ -994,52 +1057,6 @@
                 phoneInput.addEventListener('focus', function(e) {
                     const len = e.target.value.length;
                     e.target.setSelectionRange(len, len);
-                });
-            }
-
-            // Валидация формы перед отправкой
-            if (form) {
-                form.addEventListener('submit', function(e) {
-                    if (submitBtn.disabled) {
-                        e.preventDefault();
-                        return;
-                    }
-
-                    const name = document.getElementById('name').value.trim();
-                    const email = document.getElementById('email').value.trim();
-                    const phone = document.getElementById('phone').value.trim();
-                    const agreement = document.getElementById('agreement').checked;
-
-                    let errors = [];
-
-                    if (!name) {
-                        errors.push('Введите имя');
-                    }
-
-                    if (!email) {
-                        errors.push('Введите email');
-                    } else if (!isValidEmail(email)) {
-                        errors.push('Введите корректный email');
-                    }
-
-                    if (!phone) {
-                        errors.push('Введите телефон');
-                    } else if (phone.replace(/\D/g, '').length < 11) {
-                        errors.push('Введите корректный телефон');
-                    }
-
-                    if (!agreement) {
-                        errors.push('Необходимо согласие на обработку данных');
-                    }
-
-                    if (errors.length > 0) {
-                        e.preventDefault();
-                        alert(errors.join('\n'));
-                        return;
-                    }
-
-                    submitBtn.classList.add('loading');
-                    submitBtn.disabled = true;
                 });
             }
 

@@ -2,29 +2,21 @@
 
 namespace EvolutionCMS\Shop\Traits;
 
+use EvolutionCMS\Shop\Facades\Snippet;
+use Illuminate\Support\Facades\Config;
+
 trait CartTraits
 {
     public function getCart($type = 'mini')
     {
-        $globalParams = [
-            'templatePath'  => 'views/',
-            'instance'      => 'products',
-            'noneWrapOuter' => 1,
-            'tvPrefix'      => '',
-        ];
+        $globalParams = Config::get('Cart.global');
         $params = [];
         if ($type == 'mini') {
-            $params = [
-                'ownerTpl' => '@B_FILE:cart/headercart',
-            ];
+            $params = Config::get('Cart.mini');
         }
         if ($type == 'cart') {
-            $params = [
-                'ownerTpl'  => '@B_FILE: cart/cart_wrap',
-                'tpl'       => '@B_FILE: cart/cart_row',
-                'tvList'    => ['product_gallery'],
-            ];
+            $params = Config::get('Cart.cart');
         }
-        return evo()->runSnippet('Cart', array_merge($params, $globalParams));
+        return Snippet::cart(array_merge($params, $globalParams));
     }
 }

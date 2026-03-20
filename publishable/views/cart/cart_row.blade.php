@@ -18,7 +18,7 @@
         <!-- Вывод опций товара -->
         @if (!empty($data['meta']))
             @php
-                $selectedOptions = json_decode($data['meta'][0], true);;
+                $selectedOptions = json_decode($data['meta'][0], true);
                 $totalOptionsPrice = 0;
             @endphp
             @if (!empty($selectedOptions))
@@ -29,7 +29,7 @@
                             @php $totalOptionsPrice += $option['price']; @endphp
                             <li class="option-item" data-option-id="{{ $option['id'] }}">
                                 <span class="option-name">{{ $option['name'] }}</span>
-                                <span class="option-price">(+{{ evo()->runSnippet('PriceFormat', ['price' => $option['price']]) }})</span>
+                                <span class="option-price">(+@price($option['price']))</span>
                                 <button class="remove-option-btn" data-commerce-action="remove"
                                     data-row="{{ $data['row'] }}" data-remove-option="{{ $option['id'] }}"
                                     data-option-price="{{ $option['price'] }}" title="Удалить опцию">
@@ -54,11 +54,11 @@
             <i class="fas fa-trash"></i>
         </button>
         <div class="cart-item-price">
-            {{ evo()->runSnippet('PriceFormat', ['price' => $data['price']]) }}
+            @price($data['price'])
             @if (!empty($selectedOptions) && count($selectedOptions) > 0)
                 <small class="price-breakdown">
-                    (базовая: {{ evo()->runSnippet('PriceFormat', ['price' => $data['price'] - $totalOptionsPrice]) }}
-                    + опции: {{ evo()->runSnippet('PriceFormat', ['price' => $totalOptionsPrice]) }})
+                    (базовая: @price($data['price'] - $totalOptionsPrice)
+                    + опции: @price($totalOptionsPrice))
                 </small>
             @endif
         </div>

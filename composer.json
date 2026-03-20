@@ -1,11 +1,9 @@
 {
   "name": "roilafx/install",
-  "require": {
-
-  },
+  "description": "Интернет-магазин для Evolution CMS",
   "autoload": {
     "psr-4": {
-      "roilafx\\Install\\": "src"
+      "roilafx\\Install\\": "src/"
     }
   },
   "extra": {

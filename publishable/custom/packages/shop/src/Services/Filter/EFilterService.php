@@ -3,41 +3,25 @@
 namespace EvolutionCMS\Shop\Services\Filter;
 
 use EvolutionCMS\Shop\Interfaces\FilterServiceInterface;
+use EvolutionCMS\Shop\Facades\Snippet;
+use Illuminate\Support\Facades\Config;
 
 class EFilterService implements FilterServiceInterface
 {
     public function renderForm()
     {
-        evo()->runSnippet('eFilter', [
-            'cfg'               => 'custom',
-            'css'               => 0,
-            'remove_disabled'   => 0
-        ]);
+        $config = Config::get('eFilter.efilter');
+        Snippet::efilter($config);
         return (evo()->getPlaceholder('eFilter_form') ?? '');
     }
     
     public function getFilteredCatalog(int $parentId, array $options = [])
     {
-        $defaultOptions = [
-            'api'           => 1,
-            'tvList'        => 'price, product_tag',
-            'tvPrefix'      => '',
-            'display'       => 6,
-            'depth'         => 4,
-            'paginate'      => 'pages',
-            'addWhereList'  => 'c.template = 3',
-            'config'        => 'paginate:custom'
-        ];
+        $defaultOptions = Config::get('eFilter.efilterresult');
         
         $options = array_merge($defaultOptions, $options);
         $options['parents'] = $parentId;
-        
-        $json = evo()->runSnippet('eFilterResult', $options);
-        
-        if (empty($json)) {
-            return ['products' => [], 'pages' => ''];
-        }
-        
+        $json = Snippet::efilterresult($options);
         return $this->formatCatalogData($json);
     }
     
@@ -45,7 +29,6 @@ class EFilterService implements FilterServiceInterface
     {
         $items = json_decode($json, true) ?? [];
         $products = [];
-        
         foreach ($items as $item) {
             $products[] = [
                 'id'            => $item['id'],

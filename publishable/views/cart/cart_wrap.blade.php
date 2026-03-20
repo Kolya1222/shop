@@ -11,12 +11,12 @@
 
                 <div class="summary-row">
                     <span>Товары ({{ $data['count'] }} шт.)</span>
-                    <span>{{ evo()->runSnippet('PriceFormat', ['price' => $data['items_price']]) }}</span>
+                    <span>@price($data['items_price'])</span>
                 </div>
 
                 <div class="summary-row total">
                     <span>Итого</span>
-                    <span>{{ evo()->runSnippet('PriceFormat', ['price' => $data['total']]) }}</span>
+                    <span>@price($data['total'])</span>
                 </div>
 
                 <button class="btn-checkout" onclick="openOrderModal()">

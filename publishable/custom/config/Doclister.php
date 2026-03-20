@@ -17,5 +17,14 @@ return [
         'returnDLObject'=> 1,
         'filters'       => 'AND(tv:product_tag:=:Новый)',
         'orderBy'       => 'createdon DESC'
-    ]
+    ],
+    'breadcrumbs' => [
+        'showCurrent'   => 1,
+        'hideMain'      => 0,
+        'config'        => 'crumbs:custom'
+    ],
+    'dlmenu' => [
+        'maxDepth'      => 1,
+        'returnDLObject' => 1,
+    ],
 ];

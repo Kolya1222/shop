@@ -164,8 +164,8 @@ Event::listen(['evolution.OnRegisterDelivery'], function ($params) use ($deliver
 });
 
 Event::listen(['evolution.OnRegisterPayments'], function ($params) use ($paymets) {
-    $class = new \Commerce\Payments\Payment(evo(), $params);
     foreach ($paymets as $key => $data) {
+        $class = new \Commerce\Payments\Payment(evo(), $params);
         evo()->commerce->registerPayment($data['code'], $data['title'], $class);
     }
 });

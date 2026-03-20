@@ -1,8 +1,8 @@
 <h1>Репорт юзеру</h1>
 <p>
-	Здравствуйте!<br>
-	Вы оставили заказ на сайте {{ evo()->getConfig('site_url') }}.<br>
-	Номер вашего заказа: {{ $data['order']['id'] }}
+    Здравствуйте!<br>
+    Вы оставили заказ на сайте @Config('site_url').<br>
+    Номер вашего заказа: {{ $data['order']['id'] }}
 </p>
 
 <h4>Ваши данные:</h4>
@@ -12,8 +12,8 @@
     <li>Телефон: {{ $data['order']['phone'] }}</li>
 </ul>
 <p>
-	Способ доставки: {{ $data['order']['fields']['delivery_method_title'] ?? '' }}<br>
-	Способ оплаты: {{ $data['order']['fields']['payment_method_title'] ?? ''}}
+    Способ доставки: {{ $data['order']['fields']['delivery_method_title'] ?? '' }}<br>
+    Способ оплаты: {{ $data['order']['fields']['payment_method_title'] ?? '' }}
 </p>
 
 {{ $data['extra'] ?? '' }}
@@ -21,12 +21,11 @@
 <h4>Состав заказа:</h4>
 
 {!! evo()->runSnippet('Cart', [
-    'templatePath' => 'views/',
     'instance' => 'products',
     'noneWrapOuter' => 1,
     'tvPrefix' => '',
-    'ownerTpl' => '@B_FILE: cart/cart_wrap',
-    'tpl' => '@B_FILE: cart/cart_row',
+    'ownerTpl' => '@VIEW: cart.cart_wrap',
+    'tpl' => '@VIEW: cart.cart_row',
     'tvList' => ['product_gallery'],
-	'urlScheme'=>'full'
+    'urlScheme' => 'full',
 ]) !!}
