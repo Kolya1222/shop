@@ -11,7 +11,7 @@ trait DLMenuTraits
     {
         $config = Config::get('Doclister.dlmenu');
         $config['parents'] = $parents;
-        $result = Snippet::dlmenu($config);
+        $result = Snippet::DLMenu($config)->getMenu()[0];
         $menu = [];
         foreach ($result as $item) {
             $menu[] = [

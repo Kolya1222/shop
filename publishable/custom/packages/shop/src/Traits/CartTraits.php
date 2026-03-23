@@ -17,6 +17,6 @@ trait CartTraits
         if ($type == 'cart') {
             $params = Config::get('Cart.cart');
         }
-        return Snippet::cart(array_merge($params, $globalParams));
+        return Snippet::Cart(array_merge($params, $globalParams));
     }
 }

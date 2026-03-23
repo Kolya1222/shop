@@ -4,6 +4,7 @@ namespace EvolutionCMS\Shop\Controllers;
 
 use Illuminate\Support\Facades\Config;
 use EvolutionCMS\Shop\Facades\Snippet;
+use EvolutionCMS\Shop\Facades\GetPlaceholder;
 
 class PageController extends BaseController
 {
@@ -20,23 +21,16 @@ class PageController extends BaseController
     private function getItems($config)
     {
         $params = Config::get('Doclister.' . $config);
-        $data = Snippet::docLister($params);
+        $data = Snippet::DocLister($params)->getDocs();
         $result = $this->formatData($data, $config);
         return $result;
     }
 
     private function getPlaceholders()
     {
-        return [
-            'order_id'      => evo()->getPlaceholder('commerce_order.id'),
-            'order_name'    => evo()->getPlaceholder('commerce_order.name'),
-            'order_phone'   => evo()->getPlaceholder('commerce_order.phone'),
-            'order_email'   => evo()->getPlaceholder('commerce_order.email'),
-            'order_amount'  => evo()->getPlaceholder('commerce_order.amount'),
-            'order_currency'=> evo()->getPlaceholder('commerce_order.currency'),
-            'payment_id'    => evo()->getPlaceholder('commerce_payment.id'),
-            'payment_amount'=> evo()->getPlaceholder('commerce_payment.amount'),
-        ];
+        $config = Config::get('Commerce');
+        $result = GetPlaceholder::get($config);
+        return $result;
     }
 
     private function formatData($result, $config)

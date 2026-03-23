@@ -3,8 +3,10 @@
 namespace EvolutionCMS\Shop;
 
 use EvolutionCMS\ServiceProvider;
-use EvolutionCMS\Shop\Services\Filter\EFilterService;
+use EvolutionCMS\Shop\Services\eFilterService;
 use EvolutionCMS\Shop\Interfaces\FilterServiceInterface;
+use EvolutionCMS\Shop\Services\RunSnippetService;
+use EvolutionCMS\Shop\Interfaces\RunSnippetServiceInterface;
 
 class ShopServiceProvider extends ServiceProvider
 {
@@ -20,7 +22,10 @@ class ShopServiceProvider extends ServiceProvider
             dirname(__DIR__) . '/plugins/'
         );
         $this->app->singleton(FilterServiceInterface::class, function ($app) {
-            return new EFilterService($app);
+            return new eFilterService($app);
+        });
+        $this->app->singleton(RunSnippetServiceInterface::class, function ($app) {
+            return new RunSnippetService($app);
         });
     }
 

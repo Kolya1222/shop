@@ -10,7 +10,7 @@ trait BreadcrumbsTraits
     public function getBreadcrumbs()
     {
         $config = Config::get('Doclister.breadcrumbs');
-        $result = Snippet::dlcrumbs($config);
+        $result = Snippet::DLCrumbs($config);
         return ($result);
     }
 }

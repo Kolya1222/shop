@@ -1,12 +1,12 @@
 <?php
 
-namespace EvolutionCMS\Shop\Services\Filter;
+namespace EvolutionCMS\Shop\Services;
 
 use EvolutionCMS\Shop\Interfaces\FilterServiceInterface;
 use EvolutionCMS\Shop\Facades\Snippet;
 use Illuminate\Support\Facades\Config;
 
-class EFilterService implements FilterServiceInterface
+class eFilterService implements FilterServiceInterface
 {
     public function renderForm()
     {
@@ -21,7 +21,7 @@ class EFilterService implements FilterServiceInterface
         
         $options = array_merge($defaultOptions, $options);
         $options['parents'] = $parentId;
-        $json = Snippet::efilterresult($options);
+        $json = Snippet::eFilterResult($options);
         return $this->formatCatalogData($json);
     }
     
