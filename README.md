@@ -1,4 +1,6 @@
 # Установка
+Ставить поверх свежей установки Evolution CMS CE 3.1.30
+
 Выполните команды из директории `/core`:
 
 1. Установка пакета
@@ -24,13 +26,11 @@ php artisan site:full-import --all --clear-first
 
 5. Отредактировать `/core/custom/composer.json`, добавив автозагрузку
 ```json
-{
     "autoload": {
         "psr-4": {
             "EvolutionCMS\\Shop\\": "packages/shop/src/"
         }
     }
-}
 ```
 
 6. Обновить composer
@@ -38,28 +38,31 @@ php artisan site:full-import --all --clear-first
 composer dump-autoload
 ```
 
-# Магазин на Evolution CMS
+7. Очистить кеш любым удобным вам способом:
+- консоль
+- административная панель
 
-Сборка интернет-магазина для Evolution CMS
+# Магазин на Evolution CMS CE
 
 ## Реализовано
 
-- Каталог товаров
+- Каталог и фильтрация товаров
 - Корзина и оформление заказов
 - Поиск по сайту
-- Фильтрация товаров
+- Личный кабинет
 
 ### Установленные компоненты
 
 - Commerce
+- Commerce-history
 - AESearch (evoSearch)
 - ClientSettings
 - EditDocs
 - eFilter
 - MultiTV
 - FormSender (Formlister)
-- Templatesedit
-- TinyMCE4 (не используется, нужно включить в настройках)
+- TemplatesEdit
+- TinyMCE4 (не используется, можно включить в настройках)
 - DocLister
 - Multicategories (не используется)
 
@@ -82,6 +85,7 @@ composer dump-autoload
 - `catalog.blade.php`: подключение jQuery, необходимого для работы формы фильтрации
 - `item.blade.php`: переключение табов и изменение количества товара
 - `pagetext.blade.php`: переключение изображений
+- `profile.blade.php`: переключение тобов
 
 ## Логика на стороне сервера
 
@@ -93,6 +97,7 @@ composer dump-autoload
 - **CatalogController** - работа с компонентом eFilter
 - **PageController** - универсальная текстовая страница
 - **ShopController** - работа с корзиной
+- **UserControler** - для работы с личным кабинетом
 
 #### BaseController
 
@@ -103,6 +108,7 @@ composer dump-autoload
 - Информацию для пользователей из `ClientSettings`
 - Мини-корзину
 - Хлебные крошки
+- Если пользователь авторизорован, то получает `Name`, `Email`, `Phone`
 
 #### CatalogController
 
@@ -134,19 +140,26 @@ use EvolutionCMS\Shop\Facades\Snippet;
 Доступные методы (название соответствует вызываемому сниппету):
 
 - `run($name, $params)` - вызов любого сниппета
-- `doclister($params)`
-- `dlcrumbs($params)`
-- `cart($params)`
-- `dlmenu($params)`
-- `priceformat($params)`
-- `efilter($params)`
-- `efilterresult($params)`
+- Так же через метод `__call` реализован вызов любого сниппета.
 
 Пример использования:
 
 ```php
 Snippet::run($name, $params);
-Snippet::doclister($params);
+Snippet::DLCrumbs($config);
+```
+
+### Фасад GetPlaceholder
+
+Для получения плейсхолдеров используется фасад `GetPlaceholder` с методом get:
+
+```php
+use EvolutionCMS\Shop\Facades\GetPlaceholder;
+```
+
+Пример использования:
+```php
+return (GetPlaceholder::get($config));
 ```
 
 ### Конфигурация
@@ -157,14 +170,18 @@ Snippet::doclister($params);
 use Illuminate\Support\Facades\Config;
 ```
 
-В проекте используется 6 конфигураций:
+В проекте используется следующие конфигураций:
 
 - `aesearch` - внешний вид быстрых результатов поиска (*нужно будет вынести в blade через @VIEW*)
 - `settings` - настройки Evolution CMS
 - `Cart` - параметры для вызова корзины
+- `Commerce` - список плейсхолдеров для сообщения спасибо 
 - `Doclister` - параметры для всех вызовов DocLister
 - `eFilter` - параметры для фильтрации и результатов фильтрации
 - `order` - оплата без перезагрузки страницы через FormSender
+- `login` - для контроллера Login из FormLister (используется FormSender)
+- `Register` - для контроллера Register из FormLister (используется FormSender)
+- `Profile` - для контроллера Profile из FormLister (используется FormSender)
 
 ### Форматирование цены
 
