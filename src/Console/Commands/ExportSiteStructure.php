@@ -18,6 +18,10 @@ use EvolutionCMS\Models\SiteModuleDepobj;
 use EvolutionCMS\Models\SitePlugin;
 use EvolutionCMS\Models\SiteSnippet;
 use EvolutionCMS\Models\Category;
+use EvolutionCMS\Models\UserRole;
+use EvolutionCMS\Models\MembergroupName;
+use EvolutionCMS\Models\MembergroupAccess;
+use EvolutionCMS\Models\DocumentgroupName;
 
 class ExportSiteStructure extends Command
 {
@@ -38,6 +42,8 @@ class ExportSiteStructure extends Command
                             {--with-commerce : Экспортировать данные Commerce}
                             {--with-evOSearch : Экспортировать данные EvoSearch}
                             {--with-list-tv : Экспортировать данные ListTV}
+                            {--with-user-roles : Экспортировать роли пользователей}
+                            {--with-member-groups : Экспортировать группы пользователей и права доступа}
                             {--all : Экспортировать всё}
                             {--pretty : Форматировать JSON}';
 
@@ -70,7 +76,11 @@ class ExportSiteStructure extends Command
             'commerce_order_payments' => 0,
             'evosearch' => 0,
             'list_categories' => 0,
-            'list_values' => 0
+            'list_values' => 0,
+            'user_roles' => 0,
+            'member_groups' => 0,
+            'document_groups' => 0,
+            'membergroup_access' => 0
         ];
 
         $outputFile = $this->option('output');
@@ -129,6 +139,18 @@ class ExportSiteStructure extends Command
             $exportData['data']['modules'] = $this->exportModules();
         }
 
+        // Экспорт ролей пользователей
+        if ($exportAll || $this->option('with-user-roles')) {
+            $exportData['data']['user_roles'] = $this->exportUserRoles();
+        }
+
+        // Экспорт групп пользователей и прав доступа
+        if ($exportAll || $this->option('with-member-groups')) {
+            $exportData['data']['member_groups'] = $this->exportMemberGroups();
+            $exportData['data']['document_groups'] = $this->exportDocumentGroups();
+            $exportData['data']['membergroup_access'] = $this->exportMembergroupAccess();
+        }
+
         // Экспорт Commerce данных
         if ($exportAll || $this->option('with-commerce')) {
             $exportData['data']['commerce'] = $this->exportCommerce();
@@ -171,6 +193,227 @@ class ExportSiteStructure extends Command
         }
 
         $this->statistics['categories'] = count($exportData);
+        return $exportData;
+    }
+
+    /**
+     * Экспорт ролей пользователей
+     */
+    private function exportUserRoles(): array
+    {
+        $this->info('Экспортируем роли пользователей...');
+
+        $roles = UserRole::orderBy('id')->get();
+        $exportData = [];
+
+        foreach ($roles as $role) {
+            $roleData = $role->toArray();
+
+            // Конвертируем все поля прав в булевы значения
+            $permissionsFields = [
+                'frames',
+                'home',
+                'view_document',
+                'new_document',
+                'save_document',
+                'publish_document',
+                'delete_document',
+                'empty_trash',
+                'action_ok',
+                'logout',
+                'help',
+                'messages',
+                'new_user',
+                'edit_user',
+                'logs',
+                'edit_parser',
+                'save_parser',
+                'edit_template',
+                'settings',
+                'credits',
+                'new_template',
+                'save_template',
+                'delete_template',
+                'edit_snippet',
+                'new_snippet',
+                'save_snippet',
+                'delete_snippet',
+                'edit_chunk',
+                'new_chunk',
+                'save_chunk',
+                'delete_chunk',
+                'empty_cache',
+                'edit_document',
+                'change_password',
+                'error_dialog',
+                'about',
+                'category_manager',
+                'file_manager',
+                'assets_files',
+                'assets_images',
+                'save_user',
+                'delete_user',
+                'save_password',
+                'edit_role',
+                'save_role',
+                'delete_role',
+                'new_role',
+                'access_permissions',
+                'bk_manager',
+                'new_plugin',
+                'edit_plugin',
+                'save_plugin',
+                'delete_plugin',
+                'new_module',
+                'edit_module',
+                'save_module',
+                'delete_module',
+                'exec_module',
+                'view_eventlog',
+                'delete_eventlog',
+                'new_web_user',
+                'edit_web_user',
+                'save_web_user',
+                'delete_web_user',
+                'web_access_permissions',
+                'view_unpublished',
+                'import_static',
+                'export_static',
+                'remove_locks',
+                'display_locks',
+                'change_resourcetype'
+            ];
+
+            foreach ($permissionsFields as $field) {
+                if (isset($roleData[$field])) {
+                    $roleData[$field] = (bool)$roleData[$field];
+                }
+            }
+
+            // Добавляем привязку TV
+            $roleData['tvs'] = $this->getRoleTVs($role->id);
+
+            $exportData[] = $roleData;
+        }
+
+        $this->statistics['user_roles'] = count($exportData);
+        return $exportData;
+    }
+
+    /**
+     * Получение TV параметров для роли
+     */
+    private function getRoleTVs(int $roleId): array
+    {
+        $tvs = \EvolutionCMS\Models\UserRoleVar::where('roleid', $roleId)
+            ->with('tv')
+            ->orderBy('rank')
+            ->get();
+
+        $result = [];
+        foreach ($tvs as $tv) {
+            $result[] = [
+                'tv_id' => $tv->tmplvarid,
+                'tv_name' => $tv->tv->name ?? null,
+                'rank' => $tv->rank
+            ];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Экспорт групп пользователей
+     */
+    private function exportMemberGroups(): array
+    {
+        $this->info('Экспортируем группы пользователей...');
+
+        $groups = MembergroupName::orderBy('id')->get();
+        $exportData = [];
+
+        foreach ($groups as $group) {
+            $exportData[] = [
+                'id' => $group->id,
+                'name' => $group->name,
+                'users' => $this->getGroupUsers($group->id)
+            ];
+        }
+
+        $this->statistics['member_groups'] = count($exportData);
+        return $exportData;
+    }
+
+    /**
+     * Получение пользователей группы
+     */
+    private function getGroupUsers(int $groupId): array
+    {
+        $users = DB::table('member_groups')
+            ->where('user_group', $groupId)
+            ->pluck('member')
+            ->toArray();
+
+        return $users;
+    }
+
+    /**
+     * Экспорт групп документов
+     */
+    private function exportDocumentGroups(): array
+    {
+        $this->info('Экспортируем группы документов...');
+
+        $groups = DocumentgroupName::orderBy('id')->get();
+        $exportData = [];
+
+        foreach ($groups as $group) {
+            $exportData[] = [
+                'id' => $group->id,
+                'name' => $group->name,
+                'private_memgroup' => (bool)$group->private_memgroup,
+                'private_webgroup' => (bool)$group->private_webgroup,
+                'documents' => $this->getGroupDocuments($group->id)
+            ];
+        }
+
+        $this->statistics['document_groups'] = count($exportData);
+        return $exportData;
+    }
+
+    /**
+     * Получение документов группы
+     */
+    private function getGroupDocuments(int $groupId): array
+    {
+        $documents = DB::table('document_groups')
+            ->where('document_group', $groupId)
+            ->pluck('document')
+            ->toArray();
+
+        return $documents;
+    }
+
+    /**
+     * Экспорт связей групп пользователей с группами документов
+     */
+    private function exportMembergroupAccess(): array
+    {
+        $this->info('Экспортируем права доступа групп...');
+
+        $access = MembergroupAccess::orderBy('id')->get();
+        $exportData = [];
+
+        foreach ($access as $item) {
+            $exportData[] = [
+                'id' => $item->id,
+                'membergroup' => $item->membergroup,
+                'documentgroup' => $item->documentgroup,
+                'context' => $item->context
+            ];
+        }
+
+        $this->statistics['membergroup_access'] = count($exportData);
         return $exportData;
     }
 
@@ -639,7 +882,7 @@ class ExportSiteStructure extends Command
             $data['order_statuses'] = DB::table('commerce_order_statuses')->get()->toArray();
             $this->statistics['commerce_order_statuses'] = count($data['order_statuses']);
         }
-/*
+        /*
         // Заказы
         if (Schema::hasTable('commerce_orders')) {
             $data['orders'] = DB::table('commerce_orders')->get()->toArray();
@@ -728,7 +971,6 @@ class ExportSiteStructure extends Command
 
     /**
      * Сохранение в файл
-     * Добавляем связи Closure в отдельный блок
      */
     private function saveToFile(array $data, string $filename): string
     {
@@ -788,6 +1030,10 @@ class ExportSiteStructure extends Command
             ['Модули', $this->statistics['modules']],
             ['Категории', $this->statistics['categories']],
             ['Связи Closure', $this->statistics['closure_relations']],
+            ['Роли пользователей', $this->statistics['user_roles']],
+            ['Группы пользователей', $this->statistics['member_groups']],
+            ['Группы документов', $this->statistics['document_groups']],
+            ['Права доступа', $this->statistics['membergroup_access']],
         ];
 
         // Добавляем Commerce статистику если есть
@@ -796,12 +1042,6 @@ class ExportSiteStructure extends Command
         }
         if ($this->statistics['commerce_order_statuses'] > 0) {
             $rows[] = ['Commerce статусы', $this->statistics['commerce_order_statuses']];
-        }
-        if ($this->statistics['commerce_orders'] > 0) {
-            $rows[] = ['Commerce заказы', $this->statistics['commerce_orders']];
-        }
-        if ($this->statistics['commerce_order_products'] > 0) {
-            $rows[] = ['Commerce товары', $this->statistics['commerce_order_products']];
         }
 
         // Добавляем EvoSearch статистику

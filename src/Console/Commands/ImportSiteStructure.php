@@ -16,6 +16,10 @@ use EvolutionCMS\Models\SiteModuleDepobj;
 use EvolutionCMS\Models\SitePlugin;
 use EvolutionCMS\Models\SiteSnippet;
 use EvolutionCMS\Models\Category;
+use EvolutionCMS\Models\UserRole;
+use EvolutionCMS\Models\MembergroupName;
+use EvolutionCMS\Models\MembergroupAccess;
+use EvolutionCMS\Models\DocumentgroupName;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -42,6 +46,8 @@ class ImportSiteStructure extends Command
                             {--import-commerce : Импортировать данные Commerce}
                             {--import-evosearch : Импортировать данные EvoSearch}
                             {--import-list-tv : Импортировать данные ListTV}
+                            {--import-user-roles : Импортировать роли пользователей}
+                            {--import-member-groups : Импортировать группы пользователей и права доступа}
                             {--all : Импортировать всё}';
 
     protected $description = 'Полный импорт структуры сайта из JSON файла';
@@ -54,7 +60,10 @@ class ImportSiteStructure extends Command
         'snippets' => [],
         'plugins' => [],
         'modules' => [],
-        'categories' => []
+        'categories' => [],
+        'user_roles' => [],
+        'member_groups' => [],
+        'document_groups' => []
     ];
 
     private array $closureRelations = [];
@@ -76,6 +85,10 @@ class ImportSiteStructure extends Command
             'plugins' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
             'modules' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
             'categories' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
+            'user_roles' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
+            'member_groups' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
+            'document_groups' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
+            'membergroup_access' => ['created' => 0, 'updated' => 0, 'skipped' => 0],
             'closure_relations' => 0,
             'commerce_currency' => 0,
             'commerce_order_statuses' => 0,
@@ -207,6 +220,10 @@ class ImportSiteStructure extends Command
             ['Сниппеты', $stats['snippets']['total'], $stats['snippets']['create'], $stats['snippets']['update']],
             ['Плагины', $stats['plugins']['total'], $stats['plugins']['create'], $stats['plugins']['update']],
             ['Модули', $stats['modules']['total'], $stats['modules']['create'], $stats['modules']['update']],
+            ['Роли пользователей', $stats['user_roles']['total'], $stats['user_roles']['create'], $stats['user_roles']['update']],
+            ['Группы пользователей', $stats['member_groups']['total'], $stats['member_groups']['create'], $stats['member_groups']['update']],
+            ['Группы документов', $stats['document_groups']['total'], $stats['document_groups']['create'], $stats['document_groups']['update']],
+            ['Права доступа', $stats['membergroup_access']['total'], $stats['membergroup_access']['create'], $stats['membergroup_access']['update']],
         ];
 
         // Добавляем Commerce, если есть
@@ -266,6 +283,10 @@ class ImportSiteStructure extends Command
             'snippets' => ['total' => 0, 'create' => 0, 'update' => 0],
             'plugins' => ['total' => 0, 'create' => 0, 'update' => 0],
             'modules' => ['total' => 0, 'create' => 0, 'update' => 0],
+            'user_roles' => ['total' => 0, 'create' => 0, 'update' => 0],
+            'member_groups' => ['total' => 0, 'create' => 0, 'update' => 0],
+            'document_groups' => ['total' => 0, 'create' => 0, 'update' => 0],
+            'membergroup_access' => ['total' => 0, 'create' => 0, 'update' => 0],
             'commerce_currency' => ['total' => 0, 'create' => 0, 'update' => 0],
             'commerce_order_statuses' => ['total' => 0, 'create' => 0, 'update' => 0],
             'commerce_orders' => ['total' => 0, 'create' => 0, 'update' => 0],
@@ -394,6 +415,62 @@ class ImportSiteStructure extends Command
             }
         }
 
+        // Роли пользователей
+        if ($importAll || $this->option('import-user-roles')) {
+            if (isset($data['data']['user_roles'])) {
+                $result['user_roles']['total'] = count($data['data']['user_roles']);
+                foreach ($data['data']['user_roles'] as $item) {
+                    if ($updateMode && UserRole::find($item['id'])) {
+                        $result['user_roles']['update']++;
+                    } else {
+                        $result['user_roles']['create']++;
+                    }
+                }
+            }
+        }
+
+        // Группы пользователей
+        if ($importAll || $this->option('import-member-groups')) {
+            if (isset($data['data']['member_groups'])) {
+                $result['member_groups']['total'] = count($data['data']['member_groups']);
+                foreach ($data['data']['member_groups'] as $item) {
+                    if ($updateMode && MembergroupName::find($item['id'])) {
+                        $result['member_groups']['update']++;
+                    } else {
+                        $result['member_groups']['create']++;
+                    }
+                }
+            }
+        }
+
+        // Группы документов
+        if ($importAll || $this->option('import-member-groups')) {
+            if (isset($data['data']['document_groups'])) {
+                $result['document_groups']['total'] = count($data['data']['document_groups']);
+                foreach ($data['data']['document_groups'] as $item) {
+                    if ($updateMode && DocumentgroupName::find($item['id'])) {
+                        $result['document_groups']['update']++;
+                    } else {
+                        $result['document_groups']['create']++;
+                    }
+                }
+            }
+        }
+
+        // Права доступа
+        if ($importAll || $this->option('import-member-groups')) {
+            if (isset($data['data']['membergroup_access'])) {
+                $result['membergroup_access']['total'] = count($data['data']['membergroup_access']);
+                foreach ($data['data']['membergroup_access'] as $item) {
+                    if ($updateMode && MembergroupAccess::find($item['id'])) {
+                        $result['membergroup_access']['update']++;
+                    } else {
+                        $result['membergroup_access']['create']++;
+                    }
+                }
+            }
+        }
+
         // Commerce данные
         if ($importAll || $this->option('import-commerce')) {
             if (isset($data['data']['commerce'])) {
@@ -404,7 +481,6 @@ class ImportSiteStructure extends Command
                     $result['commerce_currency']['total'] = count($commerce['currency']);
                     foreach ($commerce['currency'] as $item) {
                         $item = (array)$item;
-                        // Проверяем существование конкретной записи по ID
                         if ($updateMode && isset($item['id']) && $item['id'] && DB::table('commerce_currency')->where('id', $item['id'])->exists()) {
                             $result['commerce_currency']['update']++;
                         } else {
@@ -418,7 +494,6 @@ class ImportSiteStructure extends Command
                     $result['commerce_order_statuses']['total'] = count($commerce['order_statuses']);
                     foreach ($commerce['order_statuses'] as $item) {
                         $item = (array)$item;
-                        // Проверяем существование конкретной записи по ID
                         if ($updateMode && isset($item['id']) && $item['id'] && DB::table('commerce_order_statuses')->where('id', $item['id'])->exists()) {
                             $result['commerce_order_statuses']['update']++;
                         } else {
@@ -439,45 +514,6 @@ class ImportSiteStructure extends Command
                         }
                     }
                 }
-
-                // Товары в заказах
-                if (isset($commerce['order_products'])) {
-                    $result['commerce_order_products']['total'] = count($commerce['order_products']);
-                    foreach ($commerce['order_products'] as $item) {
-                        $item = (array)$item;
-                        if ($updateMode && isset($item['id']) && $item['id'] && DB::table('commerce_order_products')->where('id', $item['id'])->exists()) {
-                            $result['commerce_order_products']['update']++;
-                        } else {
-                            $result['commerce_order_products']['create']++;
-                        }
-                    }
-                }
-
-                // История заказов
-                if (isset($commerce['order_history'])) {
-                    $result['commerce_order_history']['total'] = count($commerce['order_history']);
-                    foreach ($commerce['order_history'] as $item) {
-                        $item = (array)$item;
-                        if ($updateMode && isset($item['id']) && $item['id'] && DB::table('commerce_order_history')->where('id', $item['id'])->exists()) {
-                            $result['commerce_order_history']['update']++;
-                        } else {
-                            $result['commerce_order_history']['create']++;
-                        }
-                    }
-                }
-
-                // Платежи
-                if (isset($commerce['order_payments'])) {
-                    $result['commerce_order_payments']['total'] = count($commerce['order_payments']);
-                    foreach ($commerce['order_payments'] as $item) {
-                        $item = (array)$item;
-                        if ($updateMode && isset($item['id']) && $item['id'] && DB::table('commerce_order_payments')->where('id', $item['id'])->exists()) {
-                            $result['commerce_order_payments']['update']++;
-                        } else {
-                            $result['commerce_order_payments']['create']++;
-                        }
-                    }
-                }
             }
         }
 
@@ -485,70 +521,20 @@ class ImportSiteStructure extends Command
         if ($importAll || $this->option('import-evosearch')) {
             if (isset($data['data']['evosearch'])) {
                 $result['evosearch']['total'] = count($data['data']['evosearch']);
-
-                foreach ($data['data']['evosearch'] as $item) {
-                    $item = (array)$item;
-                    $exists = false;
-
-                    // Проверяем существование записи
-                    if (isset($item['id']) && $item['id']) {
-                        $exists = DB::table('evosearch_table')->where('id', $item['id'])->exists();
-                    } elseif (isset($item['docid']) && $item['docid']) {
-                        $exists = DB::table('evosearch_table')->where('docid', $item['docid'])->exists();
-                    }
-
-                    if ($updateMode && $exists) {
-                        $result['evosearch']['update']++;
-                    } else {
-                        $result['evosearch']['create']++;
-                    }
-                }
+                $result['evosearch']['create'] = $result['evosearch']['total'];
             }
         }
 
         // ListTV данные
         if ($importAll || $this->option('import-list-tv')) {
             if (isset($data['data']['list_tv'])) {
-                // Категории ListTV
                 if (isset($data['data']['list_tv']['categories'])) {
                     $result['list_categories']['total'] = count($data['data']['list_tv']['categories']);
-
-                    foreach ($data['data']['list_tv']['categories'] as $item) {
-                        $item = (array)$item;
-                        $exists = false;
-
-                        if (isset($item['id']) && $item['id']) {
-                            $exists = DB::table('list_catagory_table')->where('id', $item['id'])->exists();
-                        } elseif (isset($item['name'])) {
-                            $exists = DB::table('list_catagory_table')->where('name', $item['name'])->exists();
-                        }
-
-                        if ($updateMode && $exists) {
-                            $result['list_categories']['update']++;
-                        } else {
-                            $result['list_categories']['create']++;
-                        }
-                    }
+                    $result['list_categories']['create'] = $result['list_categories']['total'];
                 }
-
-                // Значения ListTV
                 if (isset($data['data']['list_tv']['values'])) {
                     $result['list_values']['total'] = count($data['data']['list_tv']['values']);
-
-                    foreach ($data['data']['list_tv']['values'] as $item) {
-                        $item = (array)$item;
-                        $exists = false;
-
-                        if (isset($item['id']) && $item['id']) {
-                            $exists = DB::table('list_value_table')->where('id', $item['id'])->exists();
-                        }
-
-                        if ($updateMode && $exists) {
-                            $result['list_values']['update']++;
-                        } else {
-                            $result['list_values']['create']++;
-                        }
-                    }
+                    $result['list_values']['create'] = $result['list_values']['total'];
                 }
             }
         }
@@ -557,20 +543,12 @@ class ImportSiteStructure extends Command
     }
 
     /**
-     * Проверка существования таблицы
-     */
-    private function tableExists(string $table): bool
-    {
-        return Schema::hasTable($table);
-    }
-
-    /**
      * Анализ ресурсов
      */
     private function analyzeResources(array $resources, bool $updateMode, array &$result = null): array
     {
         if ($result === null) {
-            $result = ['total' => 0, 'create' => 0, 'update' => 0, 'tv_values' => 0, 'closure_relations' => 0];
+            $result = ['total' => 0, 'create' => 0, 'update' => 0, 'tv_values' => 0];
         }
 
         foreach ($resources as $item) {
@@ -600,6 +578,7 @@ class ImportSiteStructure extends Command
     private function importData(array $data): int
     {
         $importAll = $this->option('all');
+        
         try {
             // Очистка таблиц если нужно
             if ($this->option('clear-first')) {
@@ -655,35 +634,51 @@ class ImportSiteStructure extends Command
                 }, 'модулей');
             }
 
-            // 8. Ресурсы
+            // 8. Роли пользователей
+            if ($importAll || $this->option('import-user-roles')) {
+                $this->safeTransaction(function () use ($data) {
+                    $this->importUserRoles($data['data']['user_roles'] ?? []);
+                }, 'ролей пользователей');
+            }
+
+            // 9. Группы пользователей и права доступа
+            if ($importAll || $this->option('import-member-groups')) {
+                $this->safeTransaction(function () use ($data) {
+                    $this->importMemberGroups($data['data']['member_groups'] ?? []);
+                    $this->importDocumentGroups($data['data']['document_groups'] ?? []);
+                    $this->importMembergroupAccess($data['data']['membergroup_access'] ?? []);
+                }, 'групп пользователей и прав доступа');
+            }
+
+            // 10. Ресурсы
             if ($importAll || $this->option('import-resources')) {
                 $this->safeTransaction(function () use ($data) {
                     $this->importResources($data['data']['resources'] ?? []);
                 }, 'ресурсов');
             }
 
-            // 9. Восстановление связей Closure
+            // 11. Восстановление связей Closure
             if ($importAll || $this->option('import-closure')) {
                 $this->safeTransaction(function () {
                     $this->restoreClosureRelations();
                 }, 'связей Closure');
             }
 
-            // 10. Commerce данные
+            // 12. Commerce данные
             if ($importAll || $this->option('import-commerce')) {
                 $this->safeTransaction(function () use ($data) {
                     $this->importCommerce($data['data']['commerce'] ?? []);
                 }, 'Commerce данных');
             }
 
-            // 11. EvoSearch данные
+            // 13. EvoSearch данные
             if ($importAll || $this->option('import-evosearch')) {
                 $this->safeTransaction(function () use ($data) {
                     $this->importEvoSearch($data['data']['evosearch'] ?? []);
                 }, 'EvoSearch данных');
             }
 
-            // 12. ListTV данные
+            // 14. ListTV данные
             if ($importAll || $this->option('import-list-tv')) {
                 $this->safeTransaction(function () use ($data) {
                     $this->importListTV($data['data']['list_tv'] ?? []);
@@ -714,14 +709,12 @@ class ImportSiteStructure extends Command
      */
     private function safeTransaction(callable $callback, string $operationName = 'операции'): void
     {
-        // Проверяем, есть ли уже активная транзакция
         $transactionLevel = DB::transactionLevel();
 
         if ($transactionLevel > 0) {
             $this->warn("Обнаружена активная транзакция (уровень {$transactionLevel}) при импорте {$operationName}");
         }
 
-        // Начинаем новую транзакцию
         DB::beginTransaction();
         $this->info("Начата транзакция для импорта {$operationName}");
 
@@ -730,7 +723,6 @@ class ImportSiteStructure extends Command
             DB::commit();
             $this->info("Транзакция для импорта {$operationName} успешно закоммичена");
         } catch (\Exception $e) {
-            // Проверяем, активна ли еще транзакция
             if (DB::transactionLevel() > 0) {
                 DB::rollBack();
                 $this->info("Транзакция для импорта {$operationName} откачена из-за ошибки");
@@ -738,7 +730,6 @@ class ImportSiteStructure extends Command
                 $this->warn("Транзакция для импорта {$operationName} уже была завершена, пропускаем rollBack");
             }
 
-            // Сохраняем ошибку и пробрасываем исключение дальше
             $this->errors[] = "Ошибка при импорте {$operationName}: " . $e->getMessage();
             throw $e;
         }
@@ -794,6 +785,18 @@ class ImportSiteStructure extends Command
             $tables[] = 'categories';
         }
 
+        if ($importAll || $this->option('import-user-roles')) {
+            $tables[] = 'user_roles';
+        }
+
+        if ($importAll || $this->option('import-member-groups')) {
+            $tables[] = 'membergroup_names';
+            $tables[] = 'documentgroup_names';
+            $tables[] = 'membergroup_access';
+            $tables[] = 'document_groups';
+            $tables[] = 'member_groups';
+        }
+
         if ($importAll || $this->option('import-commerce')) {
             $tables[] = 'commerce_currency';
             $tables[] = 'commerce_order_statuses';
@@ -812,7 +815,6 @@ class ImportSiteStructure extends Command
             $tables[] = 'list_value_table';
         }
 
-        // Отключаем проверку внешних ключей временно
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
         foreach ($tables as $table) {
@@ -882,7 +884,6 @@ class ImportSiteStructure extends Command
             try {
                 $oldId = $item['id'];
 
-                // Маппинг категории
                 if (isset($item['category']) && $item['category'] > 0) {
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
@@ -939,25 +940,20 @@ class ImportSiteStructure extends Command
         }
         usort($tvs, fn($a, $b) => $a['id'] <=> $b['id']);
         $this->info('Импорт TV параметров...');
-        $this->info('Всего TV в файле: ' . count($tvs));
-        $tvNames = array_column($tvs, 'name');
-        $this->info('Имена TV: ' . implode(', ', $tvNames));
-
-        $successCount = 0;
-        $failCount = 0;
 
         foreach ($tvs as $item) {
             try {
                 $oldId = $item['id'];
                 $templates = $item['templates'] ?? [];
 
-                // Подготавливаем поля TV
                 $tvData = [
                     'name' => $item['name'],
                     'caption' => $item['caption'] ?? '',
                     'description' => $item['description'] ?? '',
                     'type' => $item['type'] ?? 'text',
-                    'category' => $item['category'] ?? 0,
+                    'category' => isset($item['category']) && $item['category'] > 0 
+                        ? ($this->idMapping['categories'][$item['category']] ?? $item['category']) 
+                        : 0,
                     'elements' => $item['elements'] ?? '',
                     'default_text' => $item['default_text'] ?? '',
                     'rank' => $item['rank'] ?? 0,
@@ -970,17 +966,6 @@ class ImportSiteStructure extends Command
                     'editedon' => $item['editedon'] ?? time()
                 ];
 
-                // Маппинг категории
-                if (isset($tvData['category']) && $tvData['category'] > 0) {
-                    $tvData['category'] = $this->idMapping['categories'][$tvData['category']] ?? $tvData['category'];
-                }
-
-                // Логируем для отладки
-                $this->line("  Создание TV '{$item['name']}' (old ID: {$oldId})");
-                if (!empty($item['properties'])) {
-                    $this->line("    properties: " . (is_array($item['properties']) ? 'массив' : $item['properties']));
-                }
-
                 $tv = null;
 
                 if ($this->option('update')) {
@@ -991,8 +976,6 @@ class ImportSiteStructure extends Command
                     $tv->update($tvData);
                     $this->statistics['tvs']['updated']++;
                     $this->idMapping['tvs'][$oldId] = $oldId;
-                    $this->info("  TV '{$item['name']}' обновлен (ID: {$tv->id})");
-                    $successCount++;
                 } else {
                     if ($this->option('preserve-ids')) {
                         $tvData['id'] = $oldId;
@@ -1002,28 +985,14 @@ class ImportSiteStructure extends Command
                     }
                     $this->statistics['tvs']['created']++;
                     $this->idMapping['tvs'][$oldId] = $tv->id;
-                    $this->info("  TV '{$item['name']}' создан (старый ID: {$oldId}, новый ID: {$tv->id})");
-                    $successCount++;
                 }
 
-                // Импорт связей с шаблонами
                 if (!empty($templates)) {
                     $this->importTVTemplates($tv->id, $templates);
                 }
             } catch (\Exception $e) {
                 $this->errors[] = "TV '{$item['name']}': " . $e->getMessage();
-                $this->error("  TV '{$item['name']}' НЕ создан: " . $e->getMessage());
-                $failCount++;
             }
-        }
-
-        $this->info("Импорт TV завершен: успешно {$successCount}, ошибок {$failCount}");
-
-        // Проверяем, какие TV реально созданы
-        $existingTVs = SiteTmplvar::all();
-        $this->info('TV в базе после импорта:');
-        foreach ($existingTVs as $tv) {
-            $this->line("  - ID: {$tv->id}, Name: {$tv->name}, Type: {$tv->type}");
         }
     }
 
@@ -1035,7 +1004,6 @@ class ImportSiteStructure extends Command
         foreach ($templates as $templateId) {
             $newTemplateId = $this->idMapping['templates'][$templateId] ?? $templateId;
 
-            // Удаляем старые связи, если они есть
             if ($this->option('update')) {
                 SiteTmplvarTemplate::where('tmplvarid', $tvId)->delete();
             }
@@ -1062,7 +1030,6 @@ class ImportSiteStructure extends Command
             try {
                 $oldId = $item['id'];
 
-                // Маппинг категории
                 if (isset($item['category']) && $item['category'] > 0) {
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
@@ -1110,7 +1077,6 @@ class ImportSiteStructure extends Command
             try {
                 $oldId = $item['id'];
 
-                // Маппинг категории
                 if (isset($item['category']) && $item['category'] > 0) {
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
@@ -1160,7 +1126,6 @@ class ImportSiteStructure extends Command
                 $events = $item['events'] ?? [];
                 unset($item['events'], $item['id']);
 
-                // Маппинг категории
                 if (isset($item['category']) && $item['category'] > 0) {
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
@@ -1186,7 +1151,6 @@ class ImportSiteStructure extends Command
                     $this->idMapping['plugins'][$oldId] = $plugin->id;
                 }
 
-                // Импорт событий плагина
                 if (!empty($events)) {
                     $this->importPluginEvents($plugin->id, $events);
                 }
@@ -1201,10 +1165,6 @@ class ImportSiteStructure extends Command
      */
     private function importPluginEvents(int $pluginId, array $events): void
     {
-        if (empty($events)) {
-            return;
-        }
-        usort($events, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($events as $event) {
             $eventId = $event['evtid'] ?? null;
             $eventName = $event['name'] ?? null;
@@ -1217,7 +1177,6 @@ class ImportSiteStructure extends Command
             }
 
             if (!$eventId) {
-                $this->warn("Событие не найдено, пропускаем");
                 continue;
             }
 
@@ -1251,7 +1210,6 @@ class ImportSiteStructure extends Command
                 $dependencies = $item['dependencies'] ?? [];
                 unset($item['access'], $item['dependencies'], $item['id']);
 
-                // Маппинг категории
                 if (isset($item['category']) && $item['category'] > 0) {
                     $item['category'] = $this->idMapping['categories'][$item['category']] ?? $item['category'];
                 }
@@ -1277,12 +1235,10 @@ class ImportSiteStructure extends Command
                     $this->idMapping['modules'][$oldId] = $module->id;
                 }
 
-                // Импорт прав доступа
                 if (!empty($access)) {
                     $this->importModuleAccess($module->id, $access);
                 }
 
-                // Импорт зависимостей
                 if (!empty($dependencies)) {
                     $this->importModuleDependencies($module->id, $dependencies);
                 }
@@ -1297,10 +1253,6 @@ class ImportSiteStructure extends Command
      */
     private function importModuleAccess(int $moduleId, array $access): void
     {
-        if (empty($access)) {
-            return;
-        }
-        usort($access, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($access as $usergroup) {
             SiteModuleAccess::firstOrCreate([
                 'module' => $moduleId,
@@ -1314,10 +1266,6 @@ class ImportSiteStructure extends Command
      */
     private function importModuleDependencies(int $moduleId, array $dependencies): void
     {
-        if (empty($dependencies)) {
-            return;
-        }
-        usort($dependencies, fn($a, $b) => $a['id'] <=> $b['id']);
         foreach ($dependencies as $dep) {
             SiteModuleDepobj::firstOrCreate([
                 'module' => $moduleId,
@@ -1328,285 +1276,249 @@ class ImportSiteStructure extends Command
     }
 
     /**
-     * Импорт данных Commerce
+     * Импорт ролей пользователей
      */
-    private function importCommerce(array $data): void
+    private function importUserRoles(array $roles): void
     {
-        if (empty($data)) {
+        if (empty($roles)) {
             return;
         }
+        usort($roles, fn($a, $b) => $a['id'] <=> $b['id']);
+        $this->info('Импорт ролей пользователей...');
 
-        $this->info('Импорт данных Commerce...');
-
-        // Импорт валют
-        if (isset($data['currency']) && !empty($data['currency'])) {
-            usort($data['currency'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_currency', $data['currency'], 'commerce_currency');
-        }
-
-        // Импорт статусов заказов
-        if (isset($data['order_statuses']) && !empty($data['order_statuses'])) {
-            usort($data['order_statuses'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_order_statuses', $data['order_statuses'], 'commerce_order_statuses');
-        }
-
-        // Импорт заказов
-        if (isset($data['orders']) && !empty($data['orders'])) {
-            usort($data['orders'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_orders', $data['orders'], 'commerce_orders');
-        }
-
-        // Импорт товаров в заказах
-        if (isset($data['order_products']) && !empty($data['order_products'])) {
-            usort($data['order_products'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_order_products', $data['order_products'], 'commerce_order_products');
-        }
-
-        // Импорт истории заказов
-        if (isset($data['order_history']) && !empty($data['order_history'])) {
-            usort($data['order_history'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_order_history', $data['order_history'], 'commerce_order_history');
-        }
-
-        // Импорт платежей
-        if (isset($data['order_payments']) && !empty($data['order_payments'])) {
-            usort($data['order_payments'], fn($a, $b) => $a['id'] <=> $b['id']);
-            $this->importCommerceTable('commerce_order_payments', $data['order_payments'], 'commerce_order_payments');
-        }
-    }
-
-    /**
-     * Вспомогательный метод для импорта таблиц Commerce
-     */
-    private function importCommerceTable(string $table, array $items, string $statisticKey): void
-    {
-        if (!$this->tableExists($table)) {
-            $this->warn("  Таблица {$table} не существует, пропускаем");
-            return;
-        }
-
-        $dbTable = DB::table($table);
-        $updated = 0;
-        $created = 0;
-        $skipped = 0;
-
-        foreach ($items as $item) {
-            $item = (array)$item;
-
+        foreach ($roles as $item) {
             try {
-                if (isset($item['id']) && $item['id']) {
-                    // Проверяем существование записи по ID
-                    $exists = $dbTable->where('id', $item['id'])->exists();
+                $oldId = $item['id'];
+                $tvs = $item['tvs'] ?? [];
+                unset($item['tvs'], $item['id']);
 
-                    if ($exists) {
-                        if ($this->option('update')) {
-                            // Обновляем существующую запись
-                            $dbTable->where('id', $item['id'])->update($item);
-                            $updated++;
-                        } else {
-                            $skipped++;
-                        }
-                    } else {
-                        // Вставляем новую запись
-                        $dbTable->insert($item);
-                        $created++;
-                    }
+                $role = null;
+
+                if ($this->option('update')) {
+                    $role = UserRole::find($oldId);
+                }
+
+                if ($role) {
+                    $role->update($item);
+                    $this->statistics['user_roles']['updated']++;
+                    $this->idMapping['user_roles'][$oldId] = $oldId;
                 } else {
-                    // Если нет ID, просто вставляем
-                    $dbTable->insert($item);
-                    $created++;
+                    if ($this->option('preserve-ids')) {
+                        $item['id'] = $oldId;
+                        $role = UserRole::create($item);
+                    } else {
+                        $role = UserRole::create($item);
+                    }
+                    $this->statistics['user_roles']['created']++;
+                    $this->idMapping['user_roles'][$oldId] = $role->id;
+                }
+
+                if (!empty($tvs)) {
+                    $this->importRoleTVs($role->id, $tvs);
                 }
             } catch (\Exception $e) {
-                // Если ошибка дубликата - пробуем обновить
-                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['id'])) {
-                    try {
-                        $dbTable->where('id', $item['id'])->update($item);
-                        $updated++;
-                    } catch (\Exception $e2) {
-                        $this->errors[] = "Ошибка при обновлении {$table} (ID: {$item['id']}): " . $e2->getMessage();
-                    }
-                } else {
-                    $this->errors[] = "Ошибка при импорте {$table}: " . $e->getMessage();
-                }
+                $this->errors[] = "Роль '{$item['name']}': " . $e->getMessage();
             }
         }
-
-        // Сохраняем раздельную статистику
-        $this->statistics[$statisticKey . '_created'] = ($this->statistics[$statisticKey . '_created'] ?? 0) + $created;
-        $this->statistics[$statisticKey . '_updated'] = ($this->statistics[$statisticKey . '_updated'] ?? 0) + $updated;
-        $this->statistics[$statisticKey] = $created + $updated;
-
-        $this->line("  Таблица {$table}: создано {$created}, обновлено {$updated}, пропущено {$skipped}");
     }
 
     /**
-     * Импорт данных EvoSearch
+     * Импорт TV параметров для роли
      */
-    private function importEvoSearch(array $data): void
+    private function importRoleTVs(int $roleId, array $tvs): void
     {
-        if (empty($data)) {
+        foreach ($tvs as $tvItem) {
+            $tvId = $tvItem['tv_id'];
+            $rank = $tvItem['rank'] ?? 0;
+
+            // Маппинг ID TV
+            $newTvId = $this->idMapping['tvs'][$tvId] ?? $tvId;
+
+            DB::table('user_role_var')->updateOrInsert(
+                [
+                    'roleid' => $roleId,
+                    'tmplvarid' => $newTvId
+                ],
+                [
+                    'rank' => $rank
+                ]
+            );
+        }
+    }
+
+    /**
+     * Импорт групп пользователей
+     */
+    private function importMemberGroups(array $groups): void
+    {
+        if (empty($groups)) {
             return;
         }
-        $this->info('Импорт данных EvoSearch...');
+        usort($groups, fn($a, $b) => $a['id'] <=> $b['id']);
+        $this->info('Импорт групп пользователей...');
 
-        $tableName = 'evosearch_table';
-        if (!$this->tableExists($tableName)) {
-            $this->warn("  Таблица {$tableName} не существует, пропускаем");
-            return;
-        }
-
-        $table = DB::table($tableName);
-        $updated = 0;
-        $created = 0;
-        $skipped = 0;
-
-        foreach ($data as $item) {
-            $item = (array)$item;
-
+        foreach ($groups as $item) {
             try {
-                // Определяем критерии поиска
-                $exists = false;
-                $searchCriteria = [];
+                $oldId = $item['id'];
+                $users = $item['users'] ?? [];
+                unset($item['users'], $item['id']);
 
-                if (isset($item['id']) && $item['id']) {
-                    $searchCriteria['id'] = $item['id'];
-                    $exists = $table->where('id', $item['id'])->exists();
-                } elseif (isset($item['docid']) && $item['docid']) {
-                    $searchCriteria['docid'] = $item['docid'];
-                    $exists = $table->where('docid', $item['docid'])->exists();
+                $group = null;
+
+                if ($this->option('update')) {
+                    $group = MembergroupName::find($oldId);
+                }
+
+                if ($group) {
+                    $group->update($item);
+                    $this->statistics['member_groups']['updated']++;
+                    $this->idMapping['member_groups'][$oldId] = $oldId;
+                } else {
+                    if ($this->option('preserve-ids')) {
+                        $item['id'] = $oldId;
+                        $group = MembergroupName::create($item);
+                    } else {
+                        $group = MembergroupName::create($item);
+                    }
+                    $this->statistics['member_groups']['created']++;
+                    $this->idMapping['member_groups'][$oldId] = $group->id;
+                }
+
+                // Восстанавливаем связи с пользователями
+                if (!empty($users)) {
+                    $this->importMemberGroupUsers($group->id, $users);
+                }
+            } catch (\Exception $e) {
+                $this->errors[] = "Группа пользователей '{$item['name']}': " . $e->getMessage();
+            }
+        }
+    }
+
+    /**
+     * Импорт пользователей группы
+     */
+    private function importMemberGroupUsers(int $groupId, array $users): void
+    {
+        foreach ($users as $userId) {
+            DB::table('member_groups')->updateOrInsert(
+                [
+                    'user_group' => $groupId,
+                    'member' => $userId
+                ],
+                []
+            );
+        }
+    }
+
+    /**
+     * Импорт групп документов
+     */
+    private function importDocumentGroups(array $groups): void
+    {
+        if (empty($groups)) {
+            return;
+        }
+        usort($groups, fn($a, $b) => $a['id'] <=> $b['id']);
+        $this->info('Импорт групп документов...');
+
+        foreach ($groups as $item) {
+            try {
+                $oldId = $item['id'];
+                $documents = $item['documents'] ?? [];
+                unset($item['documents'], $item['id']);
+
+                $group = null;
+
+                if ($this->option('update')) {
+                    $group = DocumentgroupName::find($oldId);
+                }
+
+                if ($group) {
+                    $group->update($item);
+                    $this->statistics['document_groups']['updated']++;
+                    $this->idMapping['document_groups'][$oldId] = $oldId;
+                } else {
+                    if ($this->option('preserve-ids')) {
+                        $item['id'] = $oldId;
+                        $group = DocumentgroupName::create($item);
+                    } else {
+                        $group = DocumentgroupName::create($item);
+                    }
+                    $this->statistics['document_groups']['created']++;
+                    $this->idMapping['document_groups'][$oldId] = $group->id;
+                }
+
+                // Восстанавливаем связи с документами
+                if (!empty($documents)) {
+                    $this->importDocumentGroupDocuments($group->id, $documents);
+                }
+            } catch (\Exception $e) {
+                $this->errors[] = "Группа документов '{$item['name']}': " . $e->getMessage();
+            }
+        }
+    }
+
+    /**
+     * Импорт документов группы
+     */
+    private function importDocumentGroupDocuments(int $groupId, array $documents): void
+    {
+        foreach ($documents as $docId) {
+            // Маппинг ID документа
+            $newDocId = $this->idMapping['resources'][$docId] ?? $docId;
+
+            DB::table('document_groups')->updateOrInsert(
+                [
+                    'document_group' => $groupId,
+                    'document' => $newDocId
+                ],
+                []
+            );
+        }
+    }
+
+    /**
+     * Импорт связей групп пользователей с группами документов
+     */
+    private function importMembergroupAccess(array $access): void
+    {
+        if (empty($access)) {
+            return;
+        }
+        usort($access, fn($a, $b) => $a['id'] <=> $b['id']);
+        $this->info('Импорт прав доступа групп...');
+
+        foreach ($access as $item) {
+            try {
+                $oldId = $item['id'];
+                unset($item['id']);
+
+                // Маппинг ID групп
+                $item['membergroup'] = $this->idMapping['member_groups'][$item['membergroup']] ?? $item['membergroup'];
+                $item['documentgroup'] = $this->idMapping['document_groups'][$item['documentgroup']] ?? $item['documentgroup'];
+
+                $exists = false;
+
+                if ($this->option('update')) {
+                    $exists = MembergroupAccess::where('id', $oldId)->exists();
                 }
 
                 if ($exists) {
-                    if ($this->option('update')) {
-                        // Обновляем существующую запись
-                        $table->where($searchCriteria)->update($item);
-                        $updated++;
-                    } else {
-                        $skipped++;
-                    }
+                    MembergroupAccess::where('id', $oldId)->update($item);
+                    $this->statistics['membergroup_access']['updated']++;
                 } else {
-                    // Вставляем новую запись
-                    $table->insert($item);
-                    $created++;
+                    if ($this->option('preserve-ids')) {
+                        $item['id'] = $oldId;
+                        MembergroupAccess::create($item);
+                    } else {
+                        MembergroupAccess::create($item);
+                    }
+                    $this->statistics['membergroup_access']['created']++;
                 }
             } catch (\Exception $e) {
-                // Если ошибка дубликата - пробуем обновить по docid
-                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['docid'])) {
-                    try {
-                        $table->where('docid', $item['docid'])->update($item);
-                        $updated++;
-                    } catch (\Exception $e2) {
-                        $this->errors[] = "Ошибка при обновлении EvoSearch (docid: {$item['docid']}): " . $e2->getMessage();
-                    }
-                } else {
-                    $this->errors[] = "Ошибка при импорте EvoSearch: " . $e->getMessage();
-                }
+                $this->errors[] = "Право доступа (membergroup: {$item['membergroup']}, documentgroup: {$item['documentgroup']}): " . $e->getMessage();
             }
         }
-
-        // Сохраняем раздельную статистику
-        $this->statistics['evosearch_created'] = ($this->statistics['evosearch_created'] ?? 0) + $created;
-        $this->statistics['evosearch_updated'] = ($this->statistics['evosearch_updated'] ?? 0) + $updated;
-        $this->statistics['evosearch'] = $created + $updated;
-
-        $this->line("  Таблица evosearch_table: создано {$created}, обновлено {$updated}, пропущено {$skipped}");
-    }
-
-    /**
-     * Импорт данных ListTV
-     */
-    private function importListTV(array $data): void
-    {
-        if (empty($data)) {
-            return;
-        }
-
-        $this->info('Импорт данных ListTV...');
-
-        // Импорт категорий
-        if (isset($data['categories']) && !empty($data['categories'])) {
-            $this->importListTVTable('list_catagory_table', $data['categories'], 'list_categories');
-        }
-
-        // Импорт значений
-        if (isset($data['values']) && !empty($data['values'])) {
-            $this->importListTVTable('list_value_table', $data['values'], 'list_values');
-        }
-    }
-
-    /**
-     * Вспомогательный метод для импорта таблиц ListTV
-     */
-    private function importListTVTable(string $table, array $items, string $statisticKey): void
-    {
-        if (!$this->tableExists($table)) {
-            $this->warn("  Таблица {$table} не существует, пропускаем");
-            return;
-        }
-
-        $dbTable = DB::table($table);
-        $updated = 0;
-        $created = 0;
-        $skipped = 0;
-
-        foreach ($items as $item) {
-            $item = (array)$item;
-
-            try {
-                if (isset($item['id']) && $item['id']) {
-                    // Проверяем по ID
-                    $exists = $dbTable->where('id', $item['id'])->exists();
-
-                    if ($exists) {
-                        if ($this->option('update')) {
-                            $dbTable->where('id', $item['id'])->update($item);
-                            $updated++;
-                        } else {
-                            $skipped++;
-                        }
-                    } else {
-                        $dbTable->insert($item);
-                        $created++;
-                    }
-                } elseif (isset($item['name'])) {
-                    // Для категорий проверяем по имени
-                    $exists = $dbTable->where('name', $item['name'])->exists();
-
-                    if ($exists) {
-                        if ($this->option('update')) {
-                            $dbTable->where('name', $item['name'])->update($item);
-                            $updated++;
-                        } else {
-                            $skipped++;
-                        }
-                    } else {
-                        $dbTable->insert($item);
-                        $created++;
-                    }
-                } else {
-                    $dbTable->insert($item);
-                    $created++;
-                }
-            } catch (\Exception $e) {
-                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['id'])) {
-                    try {
-                        $dbTable->where('id', $item['id'])->update($item);
-                        $updated++;
-                    } catch (\Exception $e2) {
-                        $this->errors[] = "Ошибка при обновлении {$table}: " . $e2->getMessage();
-                    }
-                } else {
-                    $this->errors[] = "Ошибка при импорте {$table}: " . $e->getMessage();
-                }
-            }
-        }
-
-        // Сохраняем раздельную статистику
-        $this->statistics[$statisticKey . '_created'] = ($this->statistics[$statisticKey . '_created'] ?? 0) + $created;
-        $this->statistics[$statisticKey . '_updated'] = ($this->statistics[$statisticKey . '_updated'] ?? 0) + $updated;
-        $this->statistics[$statisticKey] = $created + $updated;
-
-        $this->line("  Таблица {$table}: создано {$created}, обновлено {$updated}, пропущено {$skipped}");
     }
 
     /**
@@ -1619,12 +1531,9 @@ class ImportSiteStructure extends Command
         }
 
         $flatResources = $this->flattenResources($resources);
+        usort($flatResources, fn($a, $b) => $a['id'] <=> $b['id']);
 
-        usort($flatResources, function ($a, $b) {
-            return $a['id'] <=> $b['id'];
-        });
-
-        $this->info('Импорт ресурсов (отсортировано по ID)...');
+        $this->info('Импорт ресурсов...');
         $this->info('Всего ресурсов для импорта: ' . count($flatResources));
 
         $importParent = $parent ?? (int)$this->option('parent');
@@ -1632,30 +1541,24 @@ class ImportSiteStructure extends Command
         $published = (bool)$this->option('publish');
         $currentTime = time();
 
-        // 3. Маппинг старых ID на новые
         $idMapping = [];
 
-        // 4. Сначала создаем ВСЕ ресурсы
         foreach ($flatResources as $item) {
             try {
                 $oldId = $item['id'] ?? null;
                 $tvValues = $item['tv'] ?? [];
 
-                // Создаем копию для изменений
                 $resourceData = $item;
                 unset($resourceData['tv'], $resourceData['closure_relations'], $resourceData['children'], $resourceData['id']);
 
-                // parent пока оставляем как есть, потом обновим
-                $resourceData['parent'] = $importParent; // временно
+                $resourceData['parent'] = $importParent;
 
-                // Маппинг шаблона
                 if (isset($resourceData['template']) && $resourceData['template'] > 0) {
                     $resourceData['template'] = $this->idMapping['templates'][$resourceData['template']] ?? $resourceData['template'];
                 } elseif ($defaultTemplate !== null) {
                     $resourceData['template'] = $defaultTemplate;
                 }
 
-                // Даты
                 $resourceData['createdon'] = $currentTime;
                 $resourceData['editedon'] = $currentTime;
                 if ($published) {
@@ -1663,7 +1566,6 @@ class ImportSiteStructure extends Command
                     $resourceData['publishedon'] = $currentTime;
                 }
 
-                // Создаем или обновляем ресурс
                 $resource = null;
                 if ($this->option('update') && $oldId) {
                     $resource = SiteContent::find($oldId);
@@ -1673,7 +1575,6 @@ class ImportSiteStructure extends Command
                     $resource->update($resourceData);
                     $this->statistics['resources']['updated']++;
                     $newId = $resource->id;
-                    $this->info("  Обновлен ресурс ID {$oldId} (новый ID: {$newId})");
                 } else {
                     if ($this->option('preserve-ids') && $oldId) {
                         $resourceData['id'] = $oldId;
@@ -1683,16 +1584,13 @@ class ImportSiteStructure extends Command
                     }
                     $this->statistics['resources']['created']++;
                     $newId = $resource->id;
-                    $this->info("  Создан ресурс ID {$oldId} (новый ID: {$newId})");
                 }
 
-                // Сохраняем маппинг
                 if ($oldId) {
                     $idMapping[$oldId] = $newId;
                     $this->idMapping['resources'][$oldId] = $newId;
                 }
 
-                // Сохраняем TV значения
                 if (!empty($tvValues)) {
                     $this->importResourceTVs($resource->id, $tvValues);
                     $this->statistics['tv_values'] += count($tvValues);
@@ -1702,7 +1600,7 @@ class ImportSiteStructure extends Command
             }
         }
 
-        // 5. Теперь обновляем parent'ы для всех ресурсов
+        // Обновляем parent'ы
         $this->info('Обновление связей parent...');
         foreach ($flatResources as $item) {
             $oldId = $item['id'] ?? null;
@@ -1711,23 +1609,16 @@ class ImportSiteStructure extends Command
             if ($oldId && isset($idMapping[$oldId])) {
                 $newId = $idMapping[$oldId];
 
-                // Новый parent ID (0 или маппинг)
                 $newParent = 0;
                 if ($oldParent > 0 && isset($idMapping[$oldParent])) {
                     $newParent = $idMapping[$oldParent];
                 }
 
-                // Обновляем parent
-                if ($newParent != $importParent) { // не обновляем если не изменился
+                if ($newParent != $importParent) {
                     SiteContent::where('id', $newId)->update(['parent' => $newParent]);
-                    $this->line("    Ресурс ID {$newId}: parent {$oldParent} → {$newParent}");
                 }
             }
         }
-
-        // 6. Показываем итоговый список TV (для информации)
-        $existingTVs = SiteTmplvar::pluck('name')->toArray();
-        $this->info('TV в базе после импорта ресурсов: ' . implode(', ', $existingTVs));
     }
 
     /**
@@ -1761,59 +1652,15 @@ class ImportSiteStructure extends Command
                 continue;
             }
 
-            $this->line("  Обработка TV: {$tvName} (type: {$tv->type}, ID: {$tv->id})");
+            $savedValue = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
 
-            // Декодируем JSON строку в массив для tovarparams
-            if ($tvName === 'tovarparams' && is_string($value)) {
-                $decoded = json_decode($value, true);
-                if (is_array($decoded) && isset($decoded['fieldValue'])) {
-                    $value = $decoded;
-                    $this->line("  JSON декодирован в массив");
-                }
-            }
-
-            // СПЕЦИАЛЬНАЯ ОБРАБОТКА ДЛЯ tovarparams (теперь как массив)
-            if ($tvName === 'tovarparams' && is_array($value) && isset($value['fieldValue'])) {
-                $this->line("  Обновляем ID параметров в tovarparams...");
-
-                $updated = false;
-                foreach ($value['fieldValue'] as &$param) {
-                    if (isset($param['param_id'])) {
-                        $oldId = $param['param_id'];
-                        $newId = $this->idMapping['tvs'][$oldId] ?? null;
-
-                        if ($newId && $oldId != $newId) {
-                            $this->line("    param_id: {$oldId} → {$newId}");
-                            $param['param_id'] = (string)$newId;
-                            $updated = true;
-                        }
-                    }
-                }
-
-                if ($updated) {
-                    $this->line("  ID параметров в tovarparams обновлены");
-                }
-            }
-
-            // Сохраняем значение
-            try {
-                $before = microtime(true);
-
-                $savedValue = is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value;
-
-                SiteTmplvarContentvalue::updateOrCreate(
-                    [
-                        'tmplvarid' => $tv->id,
-                        'contentid' => $resourceId
-                    ],
-                    ['value' => $savedValue]
-                );
-
-                $time = round((microtime(true) - $before) * 1000, 2);
-                $this->line("    Значение сохранено за {$time}ms");
-            } catch (\Exception $e) {
-                $this->error("    Ошибка: " . $e->getMessage());
-            }
+            SiteTmplvarContentvalue::updateOrCreate(
+                [
+                    'tmplvarid' => $tv->id,
+                    'contentid' => $resourceId
+                ],
+                ['value' => $savedValue]
+            );
         }
     }
 
@@ -1828,7 +1675,6 @@ class ImportSiteStructure extends Command
         }
 
         $this->info('Восстановление связей Closure Table...');
-        $this->info('Всего связей для восстановления: ' . count($this->closureRelations));
 
         $importedResourceIds = array_values($this->idMapping['resources']);
 
@@ -1837,23 +1683,16 @@ class ImportSiteStructure extends Command
             return;
         }
 
-        // Определяем правильное имя таблицы
         $tableName = evo()->getFullTableName('site_content_closure');
 
-        $this->info("Используется таблица: {$tableName}");
-
-        // Очищаем старые связи
         $deleted = 0;
         foreach (array_chunk($importedResourceIds, 100) as $chunk) {
             $ids = implode(',', $chunk);
             $deleted += DB::delete("DELETE FROM {$tableName} WHERE ancestor IN ({$ids}) OR descendant IN ({$ids})");
         }
-        $this->info("Удалено {$deleted} старых связей для импортированных ресурсов");
+        $this->info("Удалено {$deleted} старых связей");
 
-        // Подготавливаем связи с маппингом ID
         $relationsToInsert = [];
-        $mappedCount = 0;
-
         foreach ($this->closureRelations as $relation) {
             $newAncestor = $this->idMapping['resources'][$relation['ancestor']] ?? null;
             $newDescendant = $this->idMapping['resources'][$relation['descendant']] ?? null;
@@ -1864,13 +1703,9 @@ class ImportSiteStructure extends Command
                     'descendant' => $newDescendant,
                     'depth' => $relation['depth']
                 ];
-                $mappedCount++;
             }
         }
 
-        $this->info("Смаппировано {$mappedCount} из " . count($this->closureRelations) . " связей");
-
-        // Удаляем дубликаты
         $uniqueRelations = [];
         foreach ($relationsToInsert as $relation) {
             $key = $relation['ancestor'] . '-' . $relation['descendant'] . '-' . $relation['depth'];
@@ -1878,9 +1713,6 @@ class ImportSiteStructure extends Command
         }
         $relationsToInsert = array_values($uniqueRelations);
 
-        $this->info("Уникальных связей для вставки: " . count($relationsToInsert));
-
-        // Вставляем пачками
         $inserted = 0;
         foreach (array_chunk($relationsToInsert, 100) as $chunk) {
             $values = [];
@@ -1904,6 +1736,257 @@ class ImportSiteStructure extends Command
     }
 
     /**
+     * Импорт данных Commerce
+     */
+    private function importCommerce(array $data): void
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        $this->info('Импорт данных Commerce...');
+
+        if (isset($data['currency']) && !empty($data['currency'])) {
+            $this->importCommerceTable('commerce_currency', $data['currency'], 'commerce_currency');
+        }
+
+        if (isset($data['order_statuses']) && !empty($data['order_statuses'])) {
+            $this->importCommerceTable('commerce_order_statuses', $data['order_statuses'], 'commerce_order_statuses');
+        }
+
+        if (isset($data['orders']) && !empty($data['orders'])) {
+            $this->importCommerceTable('commerce_orders', $data['orders'], 'commerce_orders');
+        }
+
+        if (isset($data['order_products']) && !empty($data['order_products'])) {
+            $this->importCommerceTable('commerce_order_products', $data['order_products'], 'commerce_order_products');
+        }
+
+        if (isset($data['order_history']) && !empty($data['order_history'])) {
+            $this->importCommerceTable('commerce_order_history', $data['order_history'], 'commerce_order_history');
+        }
+
+        if (isset($data['order_payments']) && !empty($data['order_payments'])) {
+            $this->importCommerceTable('commerce_order_payments', $data['order_payments'], 'commerce_order_payments');
+        }
+    }
+
+    /**
+     * Вспомогательный метод для импорта таблиц Commerce
+     */
+    private function importCommerceTable(string $table, array $items, string $statisticKey): void
+    {
+        if (!$this->tableExists($table)) {
+            $this->warn("  Таблица {$table} не существует, пропускаем");
+            return;
+        }
+
+        $dbTable = DB::table($table);
+        $updated = 0;
+        $created = 0;
+
+        foreach ($items as $item) {
+            $item = (array)$item;
+
+            try {
+                if (isset($item['id']) && $item['id']) {
+                    $exists = $dbTable->where('id', $item['id'])->exists();
+
+                    if ($exists) {
+                        if ($this->option('update')) {
+                            $dbTable->where('id', $item['id'])->update($item);
+                            $updated++;
+                        }
+                    } else {
+                        $dbTable->insert($item);
+                        $created++;
+                    }
+                } else {
+                    $dbTable->insert($item);
+                    $created++;
+                }
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['id'])) {
+                    try {
+                        $dbTable->where('id', $item['id'])->update($item);
+                        $updated++;
+                    } catch (\Exception $e2) {
+                        $this->errors[] = "Ошибка при обновлении {$table} (ID: {$item['id']}): " . $e2->getMessage();
+                    }
+                } else {
+                    $this->errors[] = "Ошибка при импорте {$table}: " . $e->getMessage();
+                }
+            }
+        }
+
+        $this->statistics[$statisticKey . '_created'] = ($this->statistics[$statisticKey . '_created'] ?? 0) + $created;
+        $this->statistics[$statisticKey . '_updated'] = ($this->statistics[$statisticKey . '_updated'] ?? 0) + $updated;
+        $this->statistics[$statisticKey] = $created + $updated;
+
+        $this->line("  Таблица {$table}: создано {$created}, обновлено {$updated}");
+    }
+
+    /**
+     * Импорт данных EvoSearch
+     */
+    private function importEvoSearch(array $data): void
+    {
+        if (empty($data)) {
+            return;
+        }
+        $this->info('Импорт данных EvoSearch...');
+
+        $tableName = 'evosearch_table';
+        if (!$this->tableExists($tableName)) {
+            $this->warn("  Таблица {$tableName} не существует, пропускаем");
+            return;
+        }
+
+        $table = DB::table($tableName);
+        $updated = 0;
+        $created = 0;
+
+        foreach ($data as $item) {
+            $item = (array)$item;
+
+            try {
+                $exists = false;
+                $searchCriteria = [];
+
+                if (isset($item['id']) && $item['id']) {
+                    $searchCriteria['id'] = $item['id'];
+                    $exists = $table->where('id', $item['id'])->exists();
+                } elseif (isset($item['docid']) && $item['docid']) {
+                    $searchCriteria['docid'] = $item['docid'];
+                    $exists = $table->where('docid', $item['docid'])->exists();
+                }
+
+                if ($exists) {
+                    if ($this->option('update')) {
+                        $table->where($searchCriteria)->update($item);
+                        $updated++;
+                    }
+                } else {
+                    $table->insert($item);
+                    $created++;
+                }
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['docid'])) {
+                    try {
+                        $table->where('docid', $item['docid'])->update($item);
+                        $updated++;
+                    } catch (\Exception $e2) {
+                        $this->errors[] = "Ошибка при обновлении EvoSearch (docid: {$item['docid']}): " . $e2->getMessage();
+                    }
+                } else {
+                    $this->errors[] = "Ошибка при импорте EvoSearch: " . $e->getMessage();
+                }
+            }
+        }
+
+        $this->statistics['evosearch_created'] = ($this->statistics['evosearch_created'] ?? 0) + $created;
+        $this->statistics['evosearch_updated'] = ($this->statistics['evosearch_updated'] ?? 0) + $updated;
+        $this->statistics['evosearch'] = $created + $updated;
+
+        $this->line("  Таблица evosearch_table: создано {$created}, обновлено {$updated}");
+    }
+
+    /**
+     * Импорт данных ListTV
+     */
+    private function importListTV(array $data): void
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        $this->info('Импорт данных ListTV...');
+
+        if (isset($data['categories']) && !empty($data['categories'])) {
+            $this->importListTVTable('list_catagory_table', $data['categories'], 'list_categories');
+        }
+
+        if (isset($data['values']) && !empty($data['values'])) {
+            $this->importListTVTable('list_value_table', $data['values'], 'list_values');
+        }
+    }
+
+    /**
+     * Вспомогательный метод для импорта таблиц ListTV
+     */
+    private function importListTVTable(string $table, array $items, string $statisticKey): void
+    {
+        if (!$this->tableExists($table)) {
+            $this->warn("  Таблица {$table} не существует, пропускаем");
+            return;
+        }
+
+        $dbTable = DB::table($table);
+        $updated = 0;
+        $created = 0;
+
+        foreach ($items as $item) {
+            $item = (array)$item;
+
+            try {
+                if (isset($item['id']) && $item['id']) {
+                    $exists = $dbTable->where('id', $item['id'])->exists();
+
+                    if ($exists) {
+                        if ($this->option('update')) {
+                            $dbTable->where('id', $item['id'])->update($item);
+                            $updated++;
+                        }
+                    } else {
+                        $dbTable->insert($item);
+                        $created++;
+                    }
+                } elseif (isset($item['name'])) {
+                    $exists = $dbTable->where('name', $item['name'])->exists();
+
+                    if ($exists) {
+                        if ($this->option('update')) {
+                            $dbTable->where('name', $item['name'])->update($item);
+                            $updated++;
+                        }
+                    } else {
+                        $dbTable->insert($item);
+                        $created++;
+                    }
+                } else {
+                    $dbTable->insert($item);
+                    $created++;
+                }
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), 'Duplicate entry') !== false && isset($item['id'])) {
+                    try {
+                        $dbTable->where('id', $item['id'])->update($item);
+                        $updated++;
+                    } catch (\Exception $e2) {
+                        $this->errors[] = "Ошибка при обновлении {$table}: " . $e2->getMessage();
+                    }
+                } else {
+                    $this->errors[] = "Ошибка при импорте {$table}: " . $e->getMessage();
+                }
+            }
+        }
+
+        $this->statistics[$statisticKey . '_created'] = ($this->statistics[$statisticKey . '_created'] ?? 0) + $created;
+        $this->statistics[$statisticKey . '_updated'] = ($this->statistics[$statisticKey . '_updated'] ?? 0) + $updated;
+        $this->statistics[$statisticKey] = $created + $updated;
+
+        $this->line("  Таблица {$table}: создано {$created}, обновлено {$updated}");
+    }
+
+    /**
+     * Проверка существования таблицы
+     */
+    private function tableExists(string $table): bool
+    {
+        return Schema::hasTable($table);
+    }
+
+    /**
      * Отображение статистики импорта
      */
     private function displayImportStatistics(): void
@@ -1919,57 +2002,34 @@ class ImportSiteStructure extends Command
             ['Сниппеты', $this->statistics['snippets']['created'], $this->statistics['snippets']['updated']],
             ['Плагины', $this->statistics['plugins']['created'], $this->statistics['plugins']['updated']],
             ['Модули', $this->statistics['modules']['created'], $this->statistics['modules']['updated']],
+            ['Роли пользователей', $this->statistics['user_roles']['created'], $this->statistics['user_roles']['updated']],
+            ['Группы пользователей', $this->statistics['member_groups']['created'], $this->statistics['member_groups']['updated']],
+            ['Группы документов', $this->statistics['document_groups']['created'], $this->statistics['document_groups']['updated']],
+            ['Права доступа', $this->statistics['membergroup_access']['created'], $this->statistics['membergroup_access']['updated']],
         ];
 
-        // Добавляем Commerce статистику с разделением
         if (isset($this->statistics['commerce_currency_created']) || isset($this->statistics['commerce_currency_updated'])) {
-            $rows[] = [
-                'Commerce валюты',
-                $this->statistics['commerce_currency_created'] ?? 0,
-                $this->statistics['commerce_currency_updated'] ?? 0
-            ];
+            $rows[] = ['Commerce валюты', $this->statistics['commerce_currency_created'] ?? 0, $this->statistics['commerce_currency_updated'] ?? 0];
         }
 
         if (isset($this->statistics['commerce_order_statuses_created']) || isset($this->statistics['commerce_order_statuses_updated'])) {
-            $rows[] = [
-                'Commerce статусы',
-                $this->statistics['commerce_order_statuses_created'] ?? 0,
-                $this->statistics['commerce_order_statuses_updated'] ?? 0
-            ];
+            $rows[] = ['Commerce статусы', $this->statistics['commerce_order_statuses_created'] ?? 0, $this->statistics['commerce_order_statuses_updated'] ?? 0];
         }
 
         if (isset($this->statistics['commerce_orders_created']) || isset($this->statistics['commerce_orders_updated'])) {
-            $rows[] = [
-                'Commerce заказы',
-                $this->statistics['commerce_orders_created'] ?? 0,
-                $this->statistics['commerce_orders_updated'] ?? 0
-            ];
+            $rows[] = ['Commerce заказы', $this->statistics['commerce_orders_created'] ?? 0, $this->statistics['commerce_orders_updated'] ?? 0];
         }
 
-        // Добавляем EvoSearch статистику с разделением
         if (isset($this->statistics['evosearch_created']) || isset($this->statistics['evosearch_updated'])) {
-            $rows[] = [
-                'EvoSearch записи',
-                $this->statistics['evosearch_created'] ?? 0,
-                $this->statistics['evosearch_updated'] ?? 0
-            ];
+            $rows[] = ['EvoSearch записи', $this->statistics['evosearch_created'] ?? 0, $this->statistics['evosearch_updated'] ?? 0];
         }
 
-        // Добавляем ListTV статистику с разделением
         if (isset($this->statistics['list_categories_created']) || isset($this->statistics['list_categories_updated'])) {
-            $rows[] = [
-                'ListTV категории',
-                $this->statistics['list_categories_created'] ?? 0,
-                $this->statistics['list_categories_updated'] ?? 0
-            ];
+            $rows[] = ['ListTV категории', $this->statistics['list_categories_created'] ?? 0, $this->statistics['list_categories_updated'] ?? 0];
         }
 
         if (isset($this->statistics['list_values_created']) || isset($this->statistics['list_values_updated'])) {
-            $rows[] = [
-                'ListTV значения',
-                $this->statistics['list_values_created'] ?? 0,
-                $this->statistics['list_values_updated'] ?? 0
-            ];
+            $rows[] = ['ListTV значения', $this->statistics['list_values_created'] ?? 0, $this->statistics['list_values_updated'] ?? 0];
         }
 
         $this->table(['Элемент', 'Создано', 'Обновлено'], $rows);
