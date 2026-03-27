@@ -14,11 +14,19 @@ class BaseController extends TemplateController
     public function process()
     {
         $this->addViewData([
-            'headermenu'   => $this->getMenu(0),
-            'footermenu'   => $this->getMenu(2),
-            'footerclient' => $this->getMenu(9),
-            'cartheader'   => $this->getCart(),
-            'breadcrumbs'  => $this->getBreadcrumbs(evo()->documentIdentifier),
+            'headermenu'    => $this->getMenu(0),
+            'footermenu'    => $this->getMenu(2),
+            'footerclient'  => $this->getMenu(9),
+            'cartheader'    => $this->getCart(),
+            'breadcrumbs'   => $this->getBreadcrumbs(evo()->documentIdentifier),
         ]);
+        if (\Auth::user())
+        {
+            $this->addViewData([
+                'username'  => \Auth::user()->username,
+                'email'     => \Auth::user()->email,
+                'phone'     => \Auth::user()->phone
+            ]);
+        }
     }
 }

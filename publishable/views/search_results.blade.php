@@ -2,7 +2,6 @@
 
 @section('styles')
     <style>
-        /* Информация о результатах поиска */
         .srch_res_info {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border: 1px solid var(--border-light, #e2e8f0);
@@ -19,12 +18,10 @@
             font-weight: 600;
         }
 
-        /* Контейнер для всех результатов */
         .srch_res {
             margin: 30px 0 50px;
         }
 
-        /* Отдельный элемент результата */
         .srch_res_one {
             background: var(--white, #ffffff);
             border: 1px solid var(--border-light, #e2e8f0);
@@ -56,7 +53,6 @@
             text-decoration: underline;
         }
 
-        /* Выдержка из текста */
         .srch_ext {
             color: var(--light-graphite, #64748b);
             line-height: 1.6;
@@ -66,7 +62,6 @@
             margin-top: 8px;
         }
 
-        /* Подсветка искомых слов*/
         .srch_ext strong,
         .srch_ext b {
             background: rgba(46, 125, 94, 0.15);
@@ -76,7 +71,6 @@
             border-radius: 4px;
         }
 
-        /* ===== ПАГИНАЦИЯ ===== */
         .pagination {
             margin: 40px 0 20px;
         }
@@ -125,13 +119,11 @@
             pointer-events: none;
         }
 
-        /* Для ссылок "Назад" и "Вперед" если они появятся */
         .pagination li:first-child a,
         .pagination li:last-child a {
             padding: 0 18px;
         }
 
-        /* Адаптивность */
         @media (max-width: 768px) {
             .srch_res_info {
                 padding: 16px 20px;

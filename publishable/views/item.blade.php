@@ -2,7 +2,6 @@
 
 @section('styles')
     <style>
-        /* Основная карточка товара */
         .product-page {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -10,7 +9,6 @@
             margin: 60px 0px;
         }
 
-        /* Галерея */
         .product-gallery {
             display: flex;
             flex-direction: column;
@@ -68,7 +66,6 @@
             color: var(--deep-green);
         }
 
-        /* Информация о товаре */
         .product-info {
             display: flex;
             flex-direction: column;
@@ -89,67 +86,6 @@
             line-height: 1.2;
         }
 
-        .product-actions {
-            display: flex;
-            gap: 12px;
-        }
-
-        .product-action-btn {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 1px solid var(--border-light);
-            background: var(--white);
-            color: var(--light-graphite);
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-action-btn:hover {
-            background: var(--fresh-green);
-            color: white;
-            border-color: var(--fresh-green);
-        }
-
-        /* Рейтинг */
-        .product-rating {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .stars {
-            display: flex;
-            gap: 4px;
-            color: #fbbf24;
-            font-size: 1.1rem;
-        }
-
-        .stars i {
-            color: #fbbf24;
-        }
-
-        .stars i.empty {
-            color: var(--border-light);
-        }
-
-        .rating-value {
-            font-weight: 600;
-            color: var(--deep-green);
-        }
-
-        .rating-reviews {
-            color: var(--light-graphite);
-            text-decoration: underline;
-            cursor: pointer;
-        }
-
-        /* Цена */
         .product-price-block {
             background: var(--sage);
             border-radius: 32px;
@@ -200,7 +136,6 @@
             margin-right: 6px;
         }
 
-        /* Опции товара */
         .product-options {
             border: 1px solid var(--border-light);
             border-radius: 32px;
@@ -230,6 +165,23 @@
             font-size: 1rem;
         }
 
+        .option-item input[type="checkbox"]:checked+label {
+            background: var(--deep-green);
+            border-color: var(--deep-green);
+            color: white;
+        }
+
+        .option-item input[type="checkbox"]:checked+label .option-price {
+            color: white;
+        }
+
+        .option-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
         .options-list {
             display: flex;
             flex-wrap: wrap;
@@ -238,14 +190,6 @@
 
         .option-item {
             position: relative;
-        }
-
-        .option-item input[type="radio"],
-        .option-item input[type="checkbox"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
         }
 
         .option-item label {
@@ -262,21 +206,8 @@
             min-width: 60px;
         }
 
-        .option-item input[type="radio"]:checked+label,
-        .option-item input[type="checkbox"]:checked+label {
-            background: var(--deep-green);
-            border-color: var(--deep-green);
-            color: white;
-        }
-
         .option-item label:hover {
             border-color: var(--fresh-green);
-        }
-
-        .option-item.disabled label {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: var(--sage);
         }
 
         .option-price {
@@ -285,12 +216,6 @@
             margin-left: 4px;
         }
 
-        .option-item input[type="radio"]:checked+label .option-price,
-        .option-item input[type="checkbox"]:checked+label .option-price {
-            color: white;
-        }
-
-        /* Количество */
         .quantity-selector {
             display: flex;
             align-items: center;
@@ -343,36 +268,11 @@
             outline: none;
         }
 
-        /* Кнопки покупки */
         .purchase-buttons {
             display: flex;
             gap: 16px;
             margin: 16px 0;
             flex-wrap: wrap;
-        }
-
-        .btn-buy {
-            flex: 2;
-            background: var(--deep-green);
-            color: white;
-            border: none;
-            padding: 16px 32px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            min-width: 200px;
-        }
-
-        .btn-buy:hover {
-            background: var(--fresh-green);
-            transform: translateY(-2px);
-            box-shadow: var(--hover-shadow);
         }
 
         .btn-cart {
@@ -396,7 +296,6 @@
             color: white;
         }
 
-        /* Характеристики */
         .product-specs-block {
             border: 1px solid var(--border-light);
             border-radius: 32px;
@@ -447,7 +346,6 @@
             text-decoration: underline;
         }
 
-        /* Табы */
         .product-tabs {
             margin: 60px 0;
         }
@@ -503,67 +401,6 @@
             display: block;
         }
 
-        /* Отзывы */
-        .reviews-summary {
-            display: flex;
-            gap: 40px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .average-rating {
-            text-align: center;
-            min-width: 150px;
-        }
-
-        .average-number {
-            font-size: 4rem;
-            font-weight: 700;
-            color: var(--deep-green);
-            line-height: 1;
-        }
-
-        .average-stars {
-            margin: 10px 0;
-        }
-
-        .rating-bars {
-            flex: 1;
-        }
-
-        .rating-bar-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-
-        .rating-bar-label {
-            min-width: 60px;
-            color: var(--light-graphite);
-        }
-
-        .rating-bar {
-            flex: 1;
-            height: 8px;
-            background: var(--border-light);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .rating-bar-fill {
-            height: 100%;
-            background: #fbbf24;
-            border-radius: 8px;
-        }
-
-        .rating-bar-count {
-            min-width: 40px;
-            color: var(--light-graphite);
-            font-size: 0.9rem;
-        }
-
-        /* Похожие товары */
         .related-products {
             margin: 60px 0;
         }
@@ -580,7 +417,6 @@
             gap: 24px;
         }
 
-        /* Адаптация */
         @media (max-width: 1024px) {
             .product-page {
                 grid-template-columns: 1fr;
@@ -632,7 +468,6 @@
                 flex-direction: column;
             }
 
-            .btn-buy,
             .btn-cart {
                 width: 100%;
             }
@@ -645,11 +480,6 @@
                 flex: 1;
                 text-align: center;
                 padding: 12px;
-            }
-
-            .reviews-summary {
-                flex-direction: column;
-                gap: 20px;
             }
 
             .options-group {
@@ -707,11 +537,11 @@
                             <span class="discount-badge">-10%</span>
                         @endif
                     </div>
-                    <div class="price-info">
-                        <span><i class="fas fa-check-circle"></i> В наличии</span>
-                        <span><i class="fas fa-truck"></i> Бесплатная доставка</span>
-                        <span><i class="fas fa-credit-card"></i> Оплата картой или наличными</span>
-                    </div>
+                    <!--<div class="price-info">
+                                    <span><i class="fas fa-check-circle"></i> В наличии</span>
+                                    <span><i class="fas fa-truck"></i> Бесплатная доставка</span>
+                                    <span><i class="fas fa-credit-card"></i> Оплата картой или наличными</span>
+                                </div>-->
                 </div>
 
                 <!-- Опции товара -->
@@ -727,7 +557,7 @@
                                 @forelse ($options as $item)
                                     <div class="option-item">
                                         <input type="checkbox" name="options[options_{{ $loop->iteration }}]"
-                                            id="options_{{ $loop->iteration }}">
+                                            id="options_{{ $loop->iteration }}" value="{{ $item['name'] }}">
                                         <label for="options_{{ $loop->iteration }}">
                                             {{ $item['name'] }}
                                             <span class="option-price">(+{{ $item['value'] }} ₽)</span>
@@ -787,7 +617,6 @@
             <div class="tabs-header">
                 <button class="tab-btn active" onclick="switchTab(0)">Описание</button>
                 <button class="tab-btn" onclick="switchTab(1)">Характеристики</button>
-                <button class="tab-btn" onclick="switchTab(2)">Опции</button>
             </div>
 
             <div class="tab-content">
@@ -806,31 +635,6 @@
                         @empty
                             <div>В данный момент характеристики не доступны</div>
                         @endforelse
-                    </div>
-                </div>
-                <div class="tab-pane" id="tab-2">
-                    <h3 style="margin-bottom: 16px; color: var(--deep-green);">Все опции</h3>
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 24px;">
-                        <div>
-                            <h4 style="color: var(--deep-green); margin-bottom: 12px;">Название группы опций</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Значение
-                                    опции 1 (+500 ₽)</span>
-                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Значение
-                                    опции 2 (+300 ₽)</span>
-                                <span
-                                    style="background: var(--sage); padding: 8px 16px; border-radius: 40px; opacity: 0.5;">Недоступно</span>
-                            </div>
-                        </div>
-                        <div>
-                            <h4 style="color: var(--deep-green); margin-bottom: 12px;">Дополнительные услуги</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Доп. услуга
-                                    1 (+1000 ₽)</span>
-                                <span style="background: var(--sage); padding: 8px 16px; border-radius: 40px;">Доп. услуга
-                                    2 (+700 ₽)</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

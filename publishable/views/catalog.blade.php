@@ -2,7 +2,6 @@
 
 @section('styles')
     <style>
-        /* Фильтр каталога */
         .catalog-layout {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -10,7 +9,6 @@
             margin: 40px 0;
         }
 
-        /* Фильтр */
         .filter-sidebar {
             background: var(--white);
             border-radius: 32px;
@@ -160,7 +158,6 @@
             pointer-events: none;
         }
 
-        /* Верхняя панель каталога */
         .catalog-header {
             display: flex;
             justify-content: space-between;
@@ -180,46 +177,6 @@
             margin-top: 4px;
         }
 
-        /* АЛЬТЕРНАТИВНЫЙ СТИЛЬ SELECT (для фильтров) */
-        .filter-select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 30px;
-            border: 1px solid var(--border-light);
-            background: var(--white);
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.95rem;
-            color: var(--graphite);
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2336495e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            cursor: pointer;
-            outline: none;
-        }
-
-        .filter-select:hover {
-            border-color: var(--fresh-green);
-        }
-
-        .filter-select:focus {
-            border-color: var(--fresh-green);
-            box-shadow: 0 0 0 3px rgba(74, 144, 130, 0.1);
-        }
-
-        .filter-select:disabled,
-        .filter-select.disabled {
-            background-color: #f5f5f5;
-            border-color: #e0e0e0;
-            color: #999;
-            cursor: not-allowed;
-            opacity: 0.7;
-            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-        }
-
-        /* Сетка каталога */
         .catalog-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -227,7 +184,6 @@
             margin-bottom: 50px;
         }
 
-        /* Стили для RADIO BUTTONS */
         .filter-option input[type="radio"] {
             width: 18px;
             height: 18px;
@@ -241,62 +197,6 @@
             cursor: not-allowed;
         }
 
-        /* Альтернативный кастомный вариант radio */
-        .filter-radio-custom {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--light-graphite);
-            font-size: 0.95rem;
-            cursor: pointer;
-            position: relative;
-            padding-left: 28px;
-        }
-
-        .filter-radio-custom input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .filter-radio-custom .radio-mark {
-            position: absolute;
-            left: 0;
-            width: 18px;
-            height: 18px;
-            border: 2px solid var(--border-light);
-            border-radius: 50%;
-            background: var(--white);
-            transition: all 0.2s;
-        }
-
-        .filter-radio-custom:hover .radio-mark {
-            border-color: var(--fresh-green);
-        }
-
-        .filter-radio-custom input[type="radio"]:checked~.radio-mark {
-            border-color: var(--fresh-green);
-            background: var(--fresh-green);
-            box-shadow: inset 0 0 0 4px var(--white);
-        }
-
-        .filter-radio-custom input[type="radio"]:disabled~.radio-mark {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-color: #e0e0e0;
-        }
-
-        .filter-radio-custom input[type="radio"]:disabled~.radio-mark:hover {
-            border-color: #e0e0e0;
-        }
-
-        .filter-radio-custom.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Стили для МУЛЬТИСЕЛЕКТА */
         .filter-multiselect {
             width: 100%;
             padding: 12px 16px;
@@ -340,7 +240,6 @@
             opacity: 0.7;
         }
 
-        /* Кастомный стиль для мультиселекта с чекбоксами */
         .filter-multiselect-checkboxes {
             border: 1px solid var(--border-light);
             border-radius: 20px;
@@ -385,7 +284,6 @@
             cursor: not-allowed;
         }
 
-        /* Стили для выбранных элементов в мультиселекте */
         .filter-multiselect-tags {
             display: flex;
             flex-wrap: wrap;
@@ -420,7 +318,6 @@
             pointer-events: none;
         }
 
-        /* Мобильная адаптация */
         .filter-mobile-btn {
             display: none;
             width: 100%;

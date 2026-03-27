@@ -2,7 +2,6 @@
 
 @section('styles')
     <style>
-        /* Заголовок страницы */
         .wishlist-header {
             display: flex;
             justify-content: space-between;
@@ -78,7 +77,6 @@
             color: white;
         }
 
-        /* Фильтры избранного */
         .wishlist-filters {
             display: flex;
             gap: 12px;
@@ -119,7 +117,6 @@
             color: white;
         }
 
-        /* Раскладка избранного */
         .wishlist-layout {
             display: grid;
             grid-template-columns: 280px 1fr;
@@ -127,7 +124,6 @@
             margin-bottom: 60px;
         }
 
-        /* Боковая панель с категориями */
         .wishlist-sidebar {
             background: var(--white);
             border-radius: 32px;
@@ -206,7 +202,6 @@
             accent-color: var(--fresh-green);
         }
 
-        /* Сетка избранного */
         .wishlist-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -214,7 +209,6 @@
             margin-bottom: 40px;
         }
 
-        /* Карточка для избранного (расширенная версия) */
         .wishlist-card {
             background: var(--white);
             border-radius: 32px;
@@ -381,7 +375,6 @@
             color: white;
         }
 
-        /* Пагинация для избранного */
         .wishlist-pagination {
             display: flex;
             justify-content: center;
@@ -389,7 +382,6 @@
             margin-top: 40px;
         }
 
-        /* Пустое избранное */
         .empty-wishlist {
             text-align: center;
             padding: 80px 20px;
@@ -424,7 +416,6 @@
             display: inline-flex;
         }
 
-        /* Уведомление о добавлении в корзину */
         .wishlist-toast {
             position: fixed;
             bottom: 30px;
@@ -453,7 +444,6 @@
             font-size: 1.2rem;
         }
 
-        /* Адаптация */
         @media (max-width: 1200px) {
             .wishlist-grid {
                 grid-template-columns: repeat(2, 1fr);
