@@ -2,14 +2,14 @@
 
 namespace EvolutionCMS\Shop\Facades;
 
-use EvolutionCMS\Shop\Services\CommercePlaceholderService;
+use EvolutionCMS\Shop\Services\PlaceholderService;
 use Illuminate\Support\Facades\Facade;
 
-class GetPlaceholder extends Facade
+class Placeholder extends Facade
 {
 
     protected static function getFacadeAccessor()
     {
-        return CommercePlaceholderService::class;
+        return PlaceholderService::class;
     }
 }

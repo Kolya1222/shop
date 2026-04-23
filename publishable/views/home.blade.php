@@ -32,7 +32,7 @@
 
         <div class="section-header">
             <h2>Новинки этой недели</h2>
-            <a href="@makeUrl(2)?f%5B5%5D%5B%5D=Новый" class="section-link">Смотреть все <i class="fas fa-arrow-right"></i></a>
+            <a href="@makeUrl(2)?f%5B4%5D%5B%5D=Новый" class="section-link">Смотреть все <i class="fas fa-arrow-right"></i></a>
         </div>
 
         <div class="product-grid">

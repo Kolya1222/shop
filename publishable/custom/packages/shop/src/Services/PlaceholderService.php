@@ -2,7 +2,7 @@
 
 namespace EvolutionCMS\Shop\Services;
 
-class CommercePlaceholderService
+class PlaceholderService
 {
     public function get(array $names)
     {

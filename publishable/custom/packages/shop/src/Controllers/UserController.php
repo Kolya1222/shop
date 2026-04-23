@@ -2,6 +2,8 @@
 
 namespace EvolutionCMS\Shop\Controllers;
 
+use EvolutionCMS\Shop\Facades\Snippet;
+
 class UserController extends BaseController
 {
     public function process()
@@ -12,8 +14,8 @@ class UserController extends BaseController
 
     protected function getHistory()
     {
-        return(evo()->runSnippet('History',[
+        return Snippet::History([
             'tvList' => '6',
-        ]));
+        ]);
     }
 }

@@ -4,7 +4,7 @@ namespace EvolutionCMS\Shop\Controllers;
 
 use Illuminate\Support\Facades\Config;
 use EvolutionCMS\Shop\Facades\Snippet;
-use EvolutionCMS\Shop\Facades\GetPlaceholder;
+use EvolutionCMS\Shop\Facades\Placeholder;
 
 class PageController extends BaseController
 {
@@ -29,7 +29,7 @@ class PageController extends BaseController
     private function getPlaceholders()
     {
         $config = Config::get('Commerce');
-        $result = GetPlaceholder::get($config);
+        $result = Placeholder::get($config);
         return $result;
     }
 
