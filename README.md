@@ -151,15 +151,15 @@ Snippet::DLCrumbs($config);
 
 ### Фасад GetPlaceholder
 
-Для получения плейсхолдеров используется фасад `GetPlaceholder` с методом get:
+Для получения плейсхолдеров используется фасад `Placeholder` с методом get:
 
 ```php
-use EvolutionCMS\Shop\Facades\GetPlaceholder;
+use EvolutionCMS\Shop\Facades\Placeholder;
 ```
 
 Пример использования:
 ```php
-return (GetPlaceholder::get($config));
+return Placeholder::get($config);
 ```
 
 ### Конфигурация
