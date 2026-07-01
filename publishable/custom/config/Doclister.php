@@ -23,8 +23,19 @@ return [
         'hideMain'      => 0,
         'config'        => 'crumbs:custom'
     ],
-    'dlmenu' => [
+    'headermenu' => [
+        'parents'       => 0,
         'maxDepth'      => 1,
-        'returnDLObject' => 1,
+        'returnDLObject'=> 1,
+    ],
+    'footermenu' => [
+        'parents'       => 2,
+        'maxDepth'      => 1,
+        'returnDLObject'=> 1,
+    ],
+    'footerclient' => [
+        'parents'       => 9,
+        'maxDepth'      => 1,
+        'returnDLObject'=> 1,
     ],
 ];

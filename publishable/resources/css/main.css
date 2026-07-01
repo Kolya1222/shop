@@ -618,6 +618,7 @@ h4 {
     border: 1px solid var(--border-light);
     transition: 0.3s;
     position: relative;
+    height: 100%;
 }
 
 .product-card:hover {

@@ -14,9 +14,9 @@ class BaseController extends TemplateController
     public function process()
     {
         $this->addViewData([
-            'headermenu'    => $this->getMenu(0),
-            'footermenu'    => $this->getMenu(2),
-            'footerclient'  => $this->getMenu(9),
+            'headermenu'    => $this->getMenu('headermenu'),
+            'footermenu'    => $this->getMenu('footermenu'),
+            'footerclient'  => $this->getMenu('footerclient'),
             'cartheader'    => $this->getCart(),
             'breadcrumbs'   => $this->getBreadcrumbs(evo()->documentIdentifier),
         ]);

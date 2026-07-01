@@ -402,6 +402,49 @@
             font-weight: 600;
             color: #28a745;
         }
+
+        .quantity-input {
+            width: 60px;
+            height: 44px;
+            border: none;
+            border-left: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--deep-green);
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin: 8px 0;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-light);
+            border-radius: 40px;
+            overflow: hidden;
+        }
+
+        .quantity-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--white);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--deep-green);
+        }
+
+        .quantity-btn:hover {
+            background: var(--fresh-green);
+            color: white;
+        }
     </style>
 @endsection
 
@@ -433,19 +476,20 @@
                         <div class="form-group" data-field="name">
                             <label for="name">Ваше имя <span class="required">*</span></label>
                             <input type="text" id="name" name="name" class="form-control"
-                                placeholder="Иван Иванов" value="{{ (isset($username) && $username !== '') ? $username : '' }}">
+                                placeholder="Иван Иванов"
+                                value="{{ isset($username) && $username !== '' ? $username : '' }}">
                         </div>
 
                         <div class="form-group" data-field="email">
                             <label for="email">Email <span class="required">*</span></label>
                             <input type="email" id="email" name="email" class="form-control"
-                                placeholder="ivan@example.com" value="{{ (isset($email) && $email !== '') ? $email : '' }}">
+                                placeholder="ivan@example.com" value="{{ isset($email) && $email !== '' ? $email : '' }}">
                         </div>
 
                         <div class="form-group" data-field="phone">
                             <label for="phone">Телефон <span class="required">*</span></label>
                             <input type="tel" id="phone" name="phone" class="form-control"
-                                placeholder="+7 (999) 123-45-67" value="{{ (isset($phone) && $phone !== '') ? $phone : '' }}">
+                                placeholder="+7 (999) 123-45-67" value="{{ isset($phone) && $phone !== '' ? $phone : '' }}">
                         </div>
 
                         <h3>Способ доставки</h3>
@@ -559,6 +603,22 @@
             function isValidEmail(email) {
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
             }
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('[data-commerce-action="decrease"]');
+                if (!btn) return;
+
+                const row = btn.closest('[data-commerce-row]');
+                if (!row) return;
+
+                const input = row.querySelector('[data-commerce-action="recount"]');
+                if (!input) return;
+
+                if (parseInt(input.value, 10) <= 1) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, true);
         });
     </script>
 @endsection

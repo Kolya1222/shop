@@ -15,39 +15,45 @@ $paymets = [
 ];
 
 Event::listen(['evolution.OnBeforeCartItemAdding'], function ($params) {
-    if (!isset($params['item']['options']) || empty($params['item']['options'])) {
+    if (empty($params['item']['options']) || !is_array($params['item']['options'])) {
         return;
     }
-    $options = $params['item']['options'];
+
+    $optionIds = $params['item']['options'];
     $basePrice = $params['item']['price'];
     $additionalPrice = 0;
     $selectedOptionsDetails = [];
-    foreach ($options as $key => $value) {
-        if (strpos($key, 'options_') === 0 && !empty($value)) {
-            $optionIndex = (int) substr($key, strlen('options_'));
-            $json = json_decode(evo()->runSnippet('MultiTV', [
-                'tvName'  => 'options',
-                'docid'   => $params['item']['id'],
-                'offset'  => $optionIndex - 1,
-                'display' => 1,
-                'toJson'  => 1,
-            ]));
 
-            if (!empty($json) && isset($json[0])) {
-                $additionalPrice += (float)$json[0]->value;
-                $selectedOptionsDetails[] = [
-                    'id'    => $optionIndex,
-                    'name'  => $json[0]->name,
-                    'price' => (float)$json[0]->value,
-                    'key'   => $key,
-                    'value' => $value
-                ];
-            }
+    foreach ($optionIds as $optionId) {
+        $optionId = (int) $optionId;
+        if ($optionId <= 0) {
+            continue;
+        }
+
+        $json = json_decode(evo()->runSnippet('MultiTV', [
+            'tvName'  => 'options',
+            'docid'   => $params['item']['id'],
+            'offset'  => $optionId - 1,
+            'display' => 1,
+            'toJson'  => 1,
+        ]));
+
+        if (!empty($json) && isset($json[0])) {
+            $additionalPrice += (float)$json[0]->value;
+            $selectedOptionsDetails[] = [
+                'id'    => $optionId,
+                'name'  => $json[0]->name,
+                'price' => (float)$json[0]->value,
+            ];
         }
     }
+
     if ($additionalPrice > 0) {
         $params['item']['price'] = $basePrice + $additionalPrice;
-        $params['item']['meta'][] = json_encode($selectedOptionsDetails, JSON_UNESCAPED_UNICODE);
+    }
+
+    if (!empty($selectedOptionsDetails)) {
+        $params['item']['meta'] = $selectedOptionsDetails;
     }
 });
 
@@ -64,35 +70,25 @@ Event::listen(['evolution.OnBeforeCartItemRemoving'], function ($params) {
         if (isset($items[$row])) {
             $item = $items[$row];
 
-            $metaOptions = [];
-            if (!empty($item['meta']) && isset($item['meta'][0])) {
-                $metaOptions = json_decode($item['meta'][0], true);
+            if (empty($item['meta']) || !is_array($item['meta'])) {
+                return;
             }
 
-            $simpleOptions = isset($item['options']) ? $item['options'] : [];
-
             $removedPrice = 0;
-            $removedKey = '';
-
-            foreach ($metaOptions as $index => $opt) {
-                if ($opt['id'] == $removeOptionId) {
-                    $removedPrice = $opt['price'];
-                    $removedKey = $opt['key'];
-                    unset($metaOptions[$index]);
+            foreach ($item['meta'] as $index => $opt) {
+                if (isset($opt['id']) && $opt['id'] == $removeOptionId) {
+                    $removedPrice = (float)$opt['price'];
+                    unset($item['meta'][$index]);
                     break;
                 }
             }
 
-            if ($removedKey && isset($simpleOptions[$removedKey])) {
-                unset($simpleOptions[$removedKey]);
-            }
-
             if ($removedPrice > 0) {
                 $params['prevent'] = true;
-                $newPrice = $item['price'] - $removedPrice;
-                $items[$row]['price'] = $newPrice;
-                $items[$row]['options'] = $simpleOptions;
-                $items[$row]['meta'] = [json_encode(array_values($metaOptions), JSON_UNESCAPED_UNICODE)];
+                $item['price'] -= $removedPrice;
+                $item['meta'] = array_values($item['meta']);
+
+                $items[$row] = $item;
                 $cart->setItems($items);
             }
         }
@@ -136,14 +132,11 @@ Event::listen(['evolution.OnManagerBeforeOrderRender'], function ($params) use (
         'title' => 'Выбранные опции',
         'content' => function ($data, $DL, $eDL) {
             $output = '';
-            if (!empty($data['meta'])) {
-                $options = json_decode($data['meta'][0], true);
-                if (is_array($options)) {
-                    foreach ($options as $opt) {
-                        $output .= '<div style="font-size: 0.85em; color: #555;">';
-                        $output .= '<b>' . $opt['name'] . '</b> (+' . $opt['price'] . ' руб.)';
-                        $output .= '</div>';
-                    }
+            if (!empty($data['meta']) && is_array($data['meta'])) {
+                foreach ($data['meta'] as $opt) {
+                    $output .= '<div style="font-size: 0.85em; color: #555;">';
+                    $output .= '<b>' . e($opt['name']) . '</b> (+' . $opt['price'] . ' руб.)';
+                    $output .= '</div>';
                 }
             }
             return $output;
@@ -158,7 +151,7 @@ Event::listen(['evolution.OnRegisterDelivery'], function ($params) use ($deliver
             'title' => $data['title'],
             'price' => $data['price'],
             'code'  => $key,
-            'markup'=> '',
+            'markup' => '',
         ];
     }
 });

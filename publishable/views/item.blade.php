@@ -522,8 +522,7 @@
             </div>
 
             <!-- Правая колонка: информация -->
-            <form class="product-info" action="#" data-commerce-action="add">
-                <input type="hidden" name="id" value="{{ $id }}" />
+            <div class="product-info">
                 <div class="product-info-header">
                     <h1>{{ $pagetitle }}</h1>
                 </div>
@@ -531,64 +530,88 @@
                 <!-- Цена -->
                 <div class="product-price-block">
                     <div class="current-price">
-                        <span class="price">@price($price)</span>
-                        @if ($old_price)
-                            <span class="old-price">@price($old_price)</span>
-                            <span class="discount-badge">-10%</span>
+                        @if ($price > 0)
+                            <span class="price">@price($price)</span>
+                            @if ($old_price)
+                                <span class="old-price">@price($old_price)</span>
+                                <span class="discount-badge">-10%</span>
+                            @endif
+                        @else
+                            <span class="price" style="color: var(--fresh-green);">Цена по запросу</span>
                         @endif
                     </div>
-                    <!--<div class="price-info">
-                                    <span><i class="fas fa-check-circle"></i> В наличии</span>
-                                    <span><i class="fas fa-truck"></i> Бесплатная доставка</span>
-                                    <span><i class="fas fa-credit-card"></i> Оплата картой или наличными</span>
-                                </div>-->
                 </div>
 
-                <!-- Опции товара -->
-                @if (!empty($options) and $options != '[]')
-                    <div class="product-options">
-                        <h3>Выберите опции</h3>
-                        @php
-                            $options = json_decode($options, true)['fieldValue'] ?? [];
-                        @endphp
-                        <!-- Группа опций -->
-                        <div class="options-group">
-                            <div class="options-list">
-                                @forelse ($options as $item)
-                                    <div class="option-item">
-                                        <input type="checkbox" name="options[options_{{ $loop->iteration }}]"
-                                            id="options_{{ $loop->iteration }}" value="{{ $item['name'] }}">
-                                        <label for="options_{{ $loop->iteration }}">
-                                            {{ $item['name'] }}
-                                            <span class="option-price">(+{{ $item['value'] }} ₽)</span>
-                                        </label>
+                @if ($price > 0)
+                    <!-- Форма покупки -->
+                    <form action="#" data-commerce-action="add">
+                        <input type="hidden" name="id" value="{{ $id }}">
+
+                        <!-- Опции товара -->
+                        @if (!empty($options) and $options != '[]')
+                            <div class="product-options">
+                                <h3>Выберите опции</h3>
+                                @php
+                                    $options = json_decode($options, true)['fieldValue'] ?? [];
+                                @endphp
+                                <div class="options-group">
+                                    <div class="options-list">
+                                        @forelse ($options as $item)
+                                            <div class="option-item">
+                                                <input type="checkbox" name="options[]" id="options_{{ $loop->iteration }}"
+                                                    value="{{ $loop->iteration }}">
+                                                <label for="options_{{ $loop->iteration }}">
+                                                    {{ $item['name'] }}
+                                                    <span class="option-price">(+{{ $item['value'] }} ₽)</span>
+                                                </label>
+                                            </div>
+                                        @empty
+                                        @endforelse
                                     </div>
-                                @empty
-                                @endforelse
+                                </div>
                             </div>
+                        @endif
+
+                        <!-- Количество -->
+                        <div class="quantity-selector">
+                            <span class="quantity-label">Количество:</span>
+                            <div class="quantity-controls">
+                                <button type="button" class="quantity-btn" onclick="decrementQuantity()"><i
+                                        class="fas fa-minus"></i></button>
+                                <input type="number" name="count" class="quantity-input" value="1" min="1"
+                                    max="99" step="1">
+                                <button type="button" class="quantity-btn" onclick="incrementQuantity()"><i
+                                        class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки покупки -->
+                        <div class="purchase-buttons">
+                            <button type="submit" name="action" value="cart" class="btn-cart">
+                                <i class="fas fa-shopping-cart"></i>
+                                В корзину
+                            </button>
+                        </div>
+                    </form>
+                @else
+                    <!-- Блок для товара "Цена по запросу" -->
+                    <div class="request-info"
+                        style="margin: 20px 0; padding: 20px; background: var(--sage); border-radius: 20px;">
+                        <p style="color: var(--graphite); font-size: 1.1rem; margin-bottom: 16px;">
+                            <i class="fas fa-info-circle" style="color: var(--fresh-green);"></i>
+                            Стоимость товара уточняйте у менеджера
+                        </p>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <a href="tel:@config('client_field_telephone')" class="btn-cart" style="text-decoration: none;">
+                                <i class="fas fa-phone"></i> Позвонить
+                            </a>
+                            <a href="mailto:@config('client_field_mail')" class="btn-cart"
+                                style="background: var(--deep-green); color: white; text-decoration: none;">
+                                <i class="fas fa-envelope"></i> Написать
+                            </a>
                         </div>
                     </div>
                 @endif
-                <!-- Количество -->
-                <div class="quantity-selector">
-                    <span class="quantity-label">Количество:</span>
-                    <div class="quantity-controls">
-                        <button type="button" class="quantity-btn" onclick="decrementQuantity()"><i
-                                class="fas fa-minus"></i></button>
-                        <input type="number" name="count" class="quantity-input" value="1" min="1"
-                            max="99" step="1">
-                        <button type="button" class="quantity-btn" onclick="incrementQuantity()"><i
-                                class="fas fa-plus"></i></button>
-                    </div>
-                </div>
-
-                <!-- Кнопки покупки -->
-                <div class="purchase-buttons">
-                    <button type="submit" name="action" value="cart" class="btn-cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        В корзину
-                    </button>
-                </div>
 
                 <!-- Краткие характеристики -->
                 @php
@@ -609,7 +632,7 @@
                     </div>
                     <a href="#" class="full-specs-link">Все характеристики <i class="fas fa-arrow-right"></i></a>
                 </div>
-            </form>
+            </div>
         </div>
 
         <!-- Табы с детальной информацией -->

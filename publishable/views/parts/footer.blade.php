@@ -6,10 +6,16 @@
     <div class="container">
         <div class="footer-grid">
             <div class="footer-col">
-                <a href="#" class="logo" style="font-size: 1.6rem; margin-bottom: 16px;">
-                    <i class="fas fa-cube"></i> Тестовый магазин
-                </a>
-                <p>Магазин современной IT-техники с быстрой доставкой по всей стране.</p>
+                @if (evo()->documentIdentifier === 1)
+                    <span class="logo">
+                        <i class="fas fa-cube"></i> @config('site_name')
+                    </span>
+                @else
+                    <a href="@makeUrl(1)" class="logo">
+                        <i class="fas fa-cube"></i> @config('site_name')
+                    </a>
+                @endif
+                <p>@config('client_field_description')</p>
                 <div class="social-icons">
                     <i class="fab fa-telegram"></i>
                     <i class="fab fa-vk"></i>
@@ -42,7 +48,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>© 2026 @config('site_name'). Все права защищены. Демонстрационная версия.</p>
+            <p>© {{date('Y')}} @config('site_name'). Все права защищены. Демонстрационная версия.</p>
         </div>
     </div>
 </footer>
@@ -50,10 +56,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         new AESearch();
-    })
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
         new FormSender();
     })
 </script>
