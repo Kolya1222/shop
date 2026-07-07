@@ -5,6 +5,7 @@ namespace roilafx\Install;
 use EvolutionCMS\ServiceProvider;
 use roilafx\Install\Console\Commands\ExportSiteStructure;
 use roilafx\Install\Console\Commands\ImportSiteStructure;
+use roilafx\Install\Console\Commands\ShopInstall;
 
 class InstallServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,7 @@ class InstallServiceProvider extends ServiceProvider
         $this->commands([
             ExportSiteStructure::class,
             ImportSiteStructure::class,
+            ShopInstall::class,
         ]);
     }
 
