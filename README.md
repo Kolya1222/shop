@@ -9,38 +9,10 @@ php artisan package:installrequire roilafx/shop "*"
 ```
 *Иногда тут возникает ошибка, в таком случае нужно выполнить `composer dump-autoload`, чтобы появились миграции и можно было публиковались скрипты*
 
-2. Выполнение миграций
+2. Выпонить команду и следовать инструкциям
 ```
-php artisan migrate
+php artisan shop:install
 ```
-
-3. Публикация стилей и скриптов
-```
-php artisan vendor:publish --provider="roilafx\Install\InstallServiceProvider"
-```
-
-4. Импорт данных
-```
-php artisan site:full-import --all --clear-first
-```
-
-5. Отредактировать `/core/custom/composer.json`, добавив автозагрузку
-```json
-    "autoload": {
-        "psr-4": {
-            "EvolutionCMS\\Shop\\": "packages/shop/src/"
-        }
-    }
-```
-
-6. Обновить composer
-```
-composer dump-autoload
-```
-
-7. Очистить кеш любым удобным вам способом:
-- консоль
-- административная панель
 
 # Магазин на Evolution CMS CE
 
@@ -128,6 +100,10 @@ composer dump-autoload
 - Корзину
 - Способы оплаты
 - Методы доставки
+
+#### UserControler
+
+Предоставляет историю для личного кабинета
 
 ### Фасад Snippet
 
