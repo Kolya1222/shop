@@ -3,7 +3,8 @@ return [
     'efilter' => [
         'cfg'               => 'custom',
         'css'               => 0,
-        'remove_disabled'   => 0
+        'remove_disabled'   => 0,
+        'ajax'              => 1,
     ],
     'efilterresult' => [
         'api'           => 1,
