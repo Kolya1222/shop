@@ -42,7 +42,7 @@ return [
     'ccSender'      => 1,
     'ccSenderField' => 'email',
     'ccSenderTpl'   => '@CODE:Привет [+username.value+].',
-    'to'            => 'belov.belov-ik@yandex.ru',
+    'to'            => '',
     'reportTpl'     => '@CODE:Новый пользователь [+username.value+] ([+id.value+])',
     'subject'       => 'Регистрация на сайте',
 ];
