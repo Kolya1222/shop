@@ -163,6 +163,21 @@ Event::listen(['evolution.OnRegisterPayments'], function ($params) use ($paymets
     }
 });
 
+Event::listen(['evolution.OnCollectSubtotals'], function ($params) use ($deliveries) {
+    $processor = evo()->commerce->loadProcessor();
+
+    if ($processor->isOrderStarted() && $currentDelivery = $processor->getCurrentDelivery()) {
+        if (isset($deliveries[$currentDelivery])) {
+            $delivery = $deliveries[$currentDelivery];
+            $params['total'] += $delivery['price'];
+            $params['rows'][$currentDelivery] = [
+                'title' => $delivery['title'],
+                'price' => $delivery['price'],
+            ];
+        }
+    }
+});
+
 Event::listen(['evolution.OnOrderRawDataChanged'], function ($params) use ($deliveries) {
     $processor = evo()->commerce->loadProcessor();
     $selected = $processor->getCurrentDelivery();
